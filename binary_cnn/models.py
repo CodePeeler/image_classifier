@@ -30,7 +30,7 @@ class BinaryModel(models.Model):
 
 
 class Image(models.Model):
-    img_file = models.ImageField(upload_to='images/')
+    img_file = models.ImageField(upload_to='binary_cnn/static/')
 
     def __str__(self):
         """Return a string representation the type of model. """

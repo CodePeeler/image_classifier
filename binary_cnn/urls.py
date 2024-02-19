@@ -7,4 +7,5 @@ urlpatterns = [
     # Home page
     path('', views.home, name='home'),
     path('upload/', views.upload, name='upload'),
+    path('classify/<int:img_id>/', views.classify, name='classify'),
 ]
