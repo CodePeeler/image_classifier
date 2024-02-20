@@ -40,22 +40,27 @@ def classify_summary(request, img_id):
 
 #Calls Machine Learning classify function.
 def summary_update(request, img_id):
-
     image = Image.objects.get(id=img_id)
-    img_path = image.img_file.path
 
-    # Normalize the image
-    formatted_img = ml.format_img(img_path)
+    # Check if images is classified e.g. due to browser refresh.
+    if image.classified:
+        data = {'classification': image.img_classification}
+    else:
+        img_path = image.img_file.path
 
-    # Load a model.
-    SAVE_MODEL_DIR = 'binary_cnn/saved_models/'
-    SAVED_MODEL_NAME = 'my_model_v1'
-    CLASS_DESC = ['horse', 'human']
+        # Normalize the image
+        formatted_img = ml.format_img(img_path)
 
-    my_model = keras.models.load_model(SAVE_MODEL_DIR + SAVED_MODEL_NAME)
-    class_result = ml.classify(my_model, formatted_img, CLASS_DESC)
+        # Load a model.
+        SAVE_MODEL_DIR = 'binary_cnn/saved_models/'
+        SAVED_MODEL_NAME = 'my_model_v1'
+        CLASS_DESC = ['horse', 'human']
 
-    # TODO: Update fields in Image model.
+        my_model = keras.models.load_model(SAVE_MODEL_DIR + SAVED_MODEL_NAME)
+        class_result = ml.classify(my_model, formatted_img, CLASS_DESC)
 
-    data = {'classification': class_result}
+        image.img_classification = class_result
+        image.classified = True
+        image.save()
+        data = {'classification': class_result}
     return JsonResponse(data)
