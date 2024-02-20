@@ -31,6 +31,10 @@ class BinaryModel(models.Model):
 
 class Image(models.Model):
     img_file = models.ImageField(upload_to='binary_cnn/static/')
+    classified = models.BooleanField(default=False)
+    date_classified = models.DateTimeField(auto_now=True)
+    img_classification = models.CharField(blank=True, max_length=100)
+    prob_classification = models.DecimalField(null=True, max_digits=10, decimal_places=8)
 
     def __str__(self):
         """Return a string representation the type of model. """

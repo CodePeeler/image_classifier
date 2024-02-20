@@ -1,0 +1,58 @@
+{% extends "binary_cnn/base.html" %}
+{% block content %}
+
+<body>
+  <style>
+    /* CSS to style the thumbnail */
+    .thumbnail {
+        width: 100px; /* Specify the width of the thumbnail */
+        height: auto; /* Auto-adjust the height to maintain aspect ratio */
+    }
+    .fonts {
+      font-family: "Lucida Console", "Courier New";
+    }
+    #submit_button {
+      padding-top:20px;
+      padding: 2px;
+      border: 2px solid gray;
+    }
+    #classify_form {
+      padding: 2px;
+      border: 0px solid red;
+    }
+    #message {
+      padding-top: 10px;
+
+      border: 0px solid green;
+    }
+    #update {
+      padding-top: 10px;
+
+      border: 0px solid pink;
+      visibility: hidden;
+    }
+    #result {
+      padding-top: 10px;
+
+      border: 0px solid yellow;
+    }
+</style>
+  {% load static %}
+  <script src="{% static 'js/script.js' %}"></script>
+
+  <div class="jumbotron">
+    <h2 class="display-4">Summary</h2>
+    <div>
+      <img src="/static/{{file_name}}" alt="Thumbnail" class="thumbnail">
+      <div id="message" class="fonts">Classify this image:</div>
+      <div id="update" class="fonts">Image classified as:<div id="result" class="fonts"></div></div>
+    </div>
+  </div>
+
+  <div>
+    <form id='classify_form' onsubmit="hideContent(event); updatePage('{{img_id}}');">
+      <button id="submit_button" type="submit">Classify</button>
+    </form>
+  </div>
+</body>
+{% endblock content %}
