@@ -1,6 +1,5 @@
 {% extends "binary_cnn/base.html" %}
 {% block content %}
-    <!-- form class="upload-form" method="post" enctype="multipart/form-data" -->
     <form  method="post" enctype="multipart/form-data">
         {% csrf_token %}
         {{ form.as_p }}

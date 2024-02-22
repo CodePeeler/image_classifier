@@ -21,6 +21,5 @@ function updatePage(img_id) {
 
 function displayData(data) {
     document.getElementById("update").style.visibility = "visible";
-    console.log(data.classification)
     document.getElementById('result').innerHTML = data.classification;
 }
