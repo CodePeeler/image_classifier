@@ -1,0 +1,16 @@
+{% extends "binary_cnn/base.html" %}
+{% block content %}
+<head>
+    <meta charset="UTF-8">
+    <title>Classify form</title>
+</head>
+<body>
+<div class="jumbotron">
+    <h2 class="display-4">Summary</h2>
+    <div>
+      <div id="update" class="fonts">Image classified as: {{classification}}<div id="result" class="fonts"></div></div><br>
+      <img src="/static/{{img_file_name}}" alt="Thumbnail" class="thumbnail">
+    </div>
+  </div>
+</body>
+{% endblock content %}

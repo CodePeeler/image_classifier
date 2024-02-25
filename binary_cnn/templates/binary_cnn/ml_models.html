@@ -14,18 +14,29 @@
 <body>
   <h2 class="display-4">Models</h2><br>
 
+  <!-- Choose whether to Create a new model or Retrain an existing one.  -->
   <input type="radio" id="create" name="options" value="create">
   <label for="create">Create a new Model</label><br>
   <input type="radio" id="retrain" name="options" value="retrain">
   <label for="retrain">Retrain a Model</label><br>
 
+  <!-- The form for Creating a new model. -->
+  <form id="create_form" action="/submit" method='post'>
+    {% csrf_token %}
+    {{ bm_form_create.as_p }}
+     <input type="hidden" name="process" value="create">
+    <button name="submit" type="submit">Create model</button>
+  </form>
+  <pre id="fileContent"></pre>
 
-    <form id="create_form" action="/submit" method='post'>
-        {% csrf_token %}
-        {{ form.as_p }}
-        <button name="submit" type="submit">Create model</button>
-    </form>
-    <pre id="fileContent"></pre>
-
+  <!-- The form for Training a model. -->
+  <form id="train_form" action="/submit" method='post'>
+    {% csrf_token %}
+    {{ bm_form_train.as_p }}
+     <input type="hidden" name="process" value="train">
+     <input type="text" id="binary_model_id" name="binary_model_id" placeholder="Enter a value">
+    <button name="submit" type="submit">Train model</button>
+  </form>
+  <div id="content">X</div>
 </body>
 {% endblock content %}

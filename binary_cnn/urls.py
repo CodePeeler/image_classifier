@@ -8,6 +8,7 @@ urlpatterns = [
     path('', views.home, name='home'),
     path('ml_models/', views.ml_models, name="ml_models"),
     path('upload/', views.upload, name='upload'),
-    path('classify_summary/<int:img_id>', views.classify_summary, name='classify_summary'),
-    path('classify_summary/summary_update/<int:img_id>', views.summary_update, name='summary_update'),
+
+    path('classify_form/', views.classify_form, name='classify_form'),
+    path('classify_result.html/<int:image_id>/', views.classify_result, name='classify_result.html'),
 ]

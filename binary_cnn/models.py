@@ -39,8 +39,11 @@ def delete_binary_model_file(sender, instance, **kwargs):
 
 # BinaryModels are trained upon creation
 class TrainingConfig(models.Model):
-    training_ds_dir = models.CharField(null=True, max_length=100)
-    validation_ds_dir = models.CharField(null=True, max_length=100)
+    # name = models.CharField(max_length=100)
+    training_ds_dir = models.CharField(null=True, max_length=200)
+    validation_ds_dir = models.CharField(null=True, max_length=200)
+
+    classification_classes = models.CharField(max_length=1000)
 
     learning_rate = models.DecimalField(max_digits=10, decimal_places=8)
     accuracy = models.DecimalField(max_digits=10, decimal_places=8)
@@ -54,10 +57,11 @@ class TrainingConfig(models.Model):
 
 class Image(models.Model):
     img_file = models.ImageField(upload_to='binary_cnn/static/')
-    classified = models.BooleanField(default=False)
+    is_classified = models.BooleanField(default=False)
     date_classified = models.DateTimeField(auto_now=True)
     img_classification = models.CharField(blank=True, max_length=100)
     prob_classification = models.DecimalField(null=True, max_digits=10, decimal_places=8)
+    model_id = models.IntegerField(null=True)
 
     def __str__(self):
         """Return a string representation the type of model. """

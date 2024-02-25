@@ -1,0 +1,30 @@
+{% extends "binary_cnn/base.html" %}
+{% block content %}
+<head>
+    <meta charset="UTF-8">
+    <title>Classify form</title>
+</head>
+<body>
+
+{% load static %}
+  <script src="{% static 'js/classify_form.js' %}" defer></script>
+  <h2 class="display-4">Classify an Image</h2><br>
+
+  <form  method="post" enctype="multipart/form-data">
+    <h4 class="display-4">Step 1: Select a Model</h4>
+    {% for trained_model in trained_models %}
+      <div class="card mb-3">
+        <input type="radio" id="trained_model" name="model_id" value="{{trained_model.id}}">
+        <label for="trained_model">{{ trained_model.name }}</label>
+      </div>
+    {% endfor %}
+    <br>
+    <br>
+    <h4 class="display-4">Step 2: Upload an Image</h4>
+    {% csrf_token %}
+    {{ form.as_p }}
+    <button type="submit">Classify</button>
+  </form>
+
+</body>
+{% endblock content %}
