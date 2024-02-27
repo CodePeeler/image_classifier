@@ -1,4 +1,5 @@
 import os
+import time
 import zipfile
 from typing import List
 
@@ -13,7 +14,8 @@ from keras.preprocessing.image import ImageDataGenerator
 NUM_EPOCHS = 15
 NUM_BATCHES = 8
 LEARNING_RATE = 0.001
-CALLBACK_MIN_ACCURACY = 0.99
+CALLBACK_MIN_ACCURACY = 0.59
+callback_is_train_end = False
 
 #  Image Metadata
 INPUT_SHAPE = (300, 300, 3)
@@ -118,6 +120,20 @@ class MyCallback(keras.callbacks.Callback):
                   f" {CALLBACK_MIN_ACCURACY*100}%")
             self.model.stop_training = True
 
+    def on_train_end(self, logs=None):
+        global callback_is_train_end
+        callback_is_train_end = True
+
+
+# Then you would need a function that you would call to continually
+# check the status of this variable.
+def check_status():
+    global callback_is_train_end
+    while not callback_is_train_end:
+        # Wait 1 second.
+        time.sleep(1)
+    return callback_is_train_end
+
 
 # ImageDataGenerator, streams images from source img_dir in batches of
 # batch_size generating labels on the fly; e.g. 0=horse and 1=human.
@@ -131,6 +147,10 @@ def data_gen_helper(img_dir, batch_size):
 
 
 def train_model(the_model, training_dir, validation_dir):
+    global callback_is_train_end
+    callback_is_train_end = False
+    print(f">>>>>>>>> Training started! \ncallback_is_train_end = {callback_is_train_end}")
+
     training_data_gen = data_gen_helper(training_dir, 128)
     validation_data_gen = data_gen_helper(validation_dir, 32)
 
