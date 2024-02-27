@@ -1,0 +1,47 @@
+{% extends "binary_cnn/base.html" %}
+{% block content %}
+<head>
+    <meta charset="UTF-8">
+    <title>Create</title>
+    <style>
+      #message {
+        font-size: 14px;
+      }
+      #back_to_models_button {
+        visibility: hidden;
+      }
+      #train_button {
+        visibility: hidden;
+      }
+    </style>
+    {% load static %}
+    <script src="{% static 'js/create.js' %}" defer></script>
+</head>
+<body>
+  <h1 id="heading">Create a Model</h1>
+  <!-- The form for Creating a new model. -->
+  <form id="create_form" action="/submit" method='post'>
+    {% csrf_token %}
+    {{ create_form.as_p }}
+    <button name="submit" type="submit">Create model</button>
+  </form>
+
+  <br>
+
+  <form action = "{% url 'binary_cnn:models' %}" method="post" >
+      {% csrf_token %}
+      <button id="back_to_models_button">Back to Models</button>
+  </form>
+  <br>
+
+  <form>
+      <input type="hidden" id="hidden_model_id" name="hidden_model_id" value="">
+      <button type="button" id="train_button" onclick="trainRequest()">Train this Model</button>
+  </form>
+
+  <br>
+  <pre id="fileContent"></pre>
+
+
+</body>
+{% endblock content %}

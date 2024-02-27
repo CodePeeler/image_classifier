@@ -1,0 +1,30 @@
+<svg width="600" height="400" viewBox="0 0 600 400" fill="none" xmlns="http://www.w3.org/2000/svg">
+<rect width="600" height="400" fill="#1E1E1E"/>
+<rect width="600" height="400" fill="white"/>
+<path d="M300 380C311.046 380 320 371.046 320 360C320 348.954 311.046 340 300 340C288.954 340 280 348.954 280 360C280 371.046 288.954 380 300 380Z" fill="#4DFFFF" fill-opacity="0.85" stroke="black" stroke-width="3"/>
+<path d="M300 300C311.046 300 320 291.046 320 280C320 268.954 311.046 260 300 260C288.954 260 280 268.954 280 280C280 291.046 288.954 300 300 300Z" fill="#4DFFFF" fill-opacity="0.85" stroke="black" stroke-width="3"/>
+<path d="M300 220C311.046 220 320 211.046 320 200C320 188.954 311.046 180 300 180C288.954 180 280 188.954 280 200C280 211.046 288.954 220 300 220Z" fill="#4DFFFF" fill-opacity="0.85" stroke="black" stroke-width="3"/>
+<path d="M300 60C311.046 60 320 51.0457 320 40C320 28.9543 311.046 20 300 20C288.954 20 280 28.9543 280 40C280 51.0457 288.954 60 300 60Z" fill="#4DFFFF" fill-opacity="0.85" stroke="black" stroke-width="3"/>
+<path d="M300 140C311.046 140 320 131.046 320 120C320 108.954 311.046 100 300 100C288.954 100 280 108.954 280 120C280 131.046 288.954 140 300 140Z" fill="#4DFFFF" fill-opacity="0.85" stroke="black" stroke-width="3"/>
+<path d="M120 170C131.046 170 140 161.046 140 150C140 138.954 131.046 130 120 130C108.954 130 100 138.954 100 150C100 161.046 108.954 170 120 170Z" fill="#658EF9" fill-opacity="0.6" stroke="black" stroke-width="3"/>
+<path d="M120 270C131.046 270 140 261.046 140 250C140 238.954 131.046 230 120 230C108.954 230 100 238.954 100 250C100 261.046 108.954 270 120 270Z" fill="#658EF9" fill-opacity="0.6" stroke="black" stroke-width="3"/>
+<path d="M480 220C491.046 220 500 211.046 500 200C500 188.954 491.046 180 480 180C468.954 180 460 188.954 460 200C460 211.046 468.954 220 480 220Z" fill="#CDE49D" stroke="black" stroke-width="3"/>
+<path d="M140 150L280 40" stroke="black" stroke-width="2"/>
+<path d="M140 250L280 40" stroke="black" stroke-width="2"/>
+<path d="M140 150L280 120" stroke="black" stroke-width="2"/>
+<path d="M140 250L280 120" stroke="black" stroke-width="2"/>
+<path d="M140 150L280 200" stroke="black" stroke-width="2"/>
+<path d="M140 250L280 200" stroke="black" stroke-width="2"/>
+<path d="M140 150L280 280" stroke="black" stroke-width="2"/>
+<path d="M140 250L280 280" stroke="black" stroke-width="2"/>
+<path d="M140 150L280 360" stroke="black" stroke-width="2"/>
+<path d="M140 250L280 360" stroke="black" stroke-width="2"/>
+<path d="M320 40L460 200" stroke="black" stroke-width="2"/>
+<path d="M320 120L460 200" stroke="black" stroke-width="2"/>
+<path d="M320 200H460" stroke="black" stroke-width="2"/>
+<path d="M320 280L460 200" stroke="black" stroke-width="2"/>
+<path d="M320 360L460 200" stroke="black" stroke-width="2"/>
+<path d="M30 150H100" stroke="black" stroke-width="2"/>
+<path d="M500 200L565 200" stroke="black" stroke-width="2"/>
+<path d="M30 250H100" stroke="black" stroke-width="2"/>
+</svg>

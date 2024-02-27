@@ -6,6 +6,13 @@ from django.db.models.signals import pre_delete
 from django.dispatch import receiver
 
 
+class Status(models.TextChoices):
+    UNTRAINED = 'Untrained'
+    TRAINING = 'Training'
+    TRAINED = 'Trained'
+    ERROR = 'Error'
+
+
 class BinaryModel(models.Model):
     #bm_owner = models.ForeignKey(User, on_delete=models.CASCADE)
     name = models.CharField(max_length=100)
@@ -16,7 +23,8 @@ class BinaryModel(models.Model):
     save_dir = models.CharField(max_length=100, default='binary_cnn/saved_models')
 
     path_model_summary = models.CharField(max_length=100)
-    is_trained = models.BooleanField(default=False)
+    status = models.CharField(max_length=9, choices=Status.choices, default=Status.UNTRAINED)
+
     is_active = models.BooleanField(default=False)
 
     def __str__(self):

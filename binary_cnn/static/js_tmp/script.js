@@ -4,9 +4,11 @@ function hideContent(event) {
     event.preventDefault();
 }
 
-function updatePage(img_id) {
+function updatePage(img_id, model_id) {
     var xhr = new XMLHttpRequest();
-    xhr.open('GET', 'summary_update/'+img_id);
+
+    alert('/summary_update/'+img_id+'/'+model_id)
+    xhr.open('GET', 'summary_update/'+img_id+'/'+model_id);
     xhr.onload = function() {
         if (xhr.status === 200) {
             var data = JSON.parse(xhr.responseText);

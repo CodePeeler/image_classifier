@@ -1,0 +1,67 @@
+{% extends "binary_cnn/base.html" %}
+{% block content %}
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+    <style>
+        #link_create {
+            padding: 10px;
+            padding-bottom: 40px;
+        }
+        table {
+            border-collapse: collapse;
+            width: 60%;
+        }
+        th, td {
+            border: 1px solid #dddddd;
+            text-align: left;
+            padding: 8px;
+        }
+        th {
+            background-color: #f2f2f2;
+        }
+        .status {
+            color: green;
+            #border: 0px solid green;
+        }
+    </style>
+    {% load static %}
+    <script src="{% static 'js/models.js' %}" defer></script>
+</head>
+<body>
+  <h1>Models</h1>
+  <div id="link_create"><a class="nav-link" href="{% url 'binary_cnn:create' %}">Create a new model</a></div>
+
+  <table>
+    <thead>
+        <tr>
+            <th>Name</th>
+            <th>Date</th>
+            <th>Status</th>
+            <th>Action</th>
+            <th></th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for binary_model in binary_models %}
+        <tr>
+            <td>{{ binary_model.name }}</td>
+            <td>{{ binary_model.date_added|date:'M d, Y H:i'  }}</td>
+            <td class="status">{{ binary_model.status }}</td>
+
+            <td>
+                <select>
+                    <option value="">Select an action</option>
+                    <option value="Train">Train/Retrain</option>
+                    <option value="Delete">Delete</option>
+                </select>
+            </td>
+            <td></td>
+        </tr>
+        {% endfor %}
+    </tbody>
+  </table>
+
+</body>
+{% endblock content %}
