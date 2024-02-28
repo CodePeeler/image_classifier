@@ -1,28 +1,33 @@
 {% extends "binary_cnn/base.html" %}
+
+{% load bootstrap4 %}
 {% block content %}
 <head>
     <meta charset="UTF-8">
+     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
     <title>Title</title>
+    {% bootstrap_css %}
+    {% bootstrap_javascript jquery='full' %}
     <style>
       #nn_img {
         position: absolute;
-        width: 150px;
-        height: 120px;
+        width: 120px;
+        height: 80px;
         padding-left: 0px;
         padding-bottom: 0px;
         border: 0px solid red;
       }
       #nn_svg_box {
-        width: 450px;
-        height: 145px;
-        padding-left: 20px;
+        width: 420px;
+        height: 90px;
+        padding-left: 0px;
         border: 0px solid green;
       }
       #title {
         position: absolute;
-        padding-top: 40px;
-        width: 300px;
-        padding-left: 150px;
+        padding-top: 20px;
+        width: 420px;
+        padding-left: 120px;
         font-size: 30px;
         border: 0px solid blue;
       }

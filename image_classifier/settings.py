@@ -34,6 +34,9 @@ INSTALLED_APPS = [
     # My Apps
     'binary_cnn',
 
+    # Third party apps.
+    'bootstrap4',
+
     # Default Apps
     'django.contrib.admin',
     'django.contrib.auth',

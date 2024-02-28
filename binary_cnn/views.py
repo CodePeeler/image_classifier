@@ -1,29 +1,16 @@
-from concurrent.futures import ThreadPoolExecutor
 import os
-import stat
 
+import keras
 from django.http import JsonResponse
 from django.shortcuts import render, redirect
 
+import binary_cnn.ml_cnn as ml
 from binary_cnn.forms import BinaryModelForm, TrainingConfigForm, ImageForm
 from binary_cnn.models import Status, BinaryModel, Image, TrainingConfig
-import keras
-
-import binary_cnn.ml_cnn as ml
 
 
 def home(request):
     return render(request, 'binary_cnn/home.html')
-
-
-# This should only be called when the current status of a model is
-# actively training - will be called with javascript using a callback
-# as the check_status is blocking.
-def update_status(request):
-    # TODO, Think how you would get an update for a given model.
-    #  - currently we assume only one model can be in a training state.
-    data = {'status': ml.check_status()}
-    return JsonResponse(data)
 
 
 def models(request):
@@ -34,7 +21,31 @@ def models(request):
     return render(request, 'binary_cnn/models.html', context)
 
 
-# Javascript will call this method.
+def model(request, model_id):
+    try:
+        # Get the requested model
+        binary_model = BinaryModel.objects.get(id=model_id)
+        training_config = None
+        if binary_model.status == Status.TRAINED:
+            training_config = TrainingConfig.objects.get(binary_model=binary_model)
+        context = {'binary_model': binary_model, 'training_config': training_config}
+        return render(request, 'binary_cnn/model.html', context)
+    except BinaryModel.DoesNotExist:
+        # Handle the case where the object does not exist
+        print("Object does not exist")
+    return redirect('binary_cnn:models')
+
+
+def delete_model(model_id):
+    try:
+        binary_model = BinaryModel.objects.get(id=model_id)
+        binary_model.delete()
+    except BinaryModel.DoesNotExist:
+        # Handle the case where the object does not exist
+        print("Object does not exist")
+    return redirect('binary_cnn:models')
+
+
 def create(request):
     if request.method != 'POST':
         create_form = BinaryModelForm()
@@ -77,65 +88,55 @@ def create(request):
 
 
 def train(request, model_id):
-    # TODO code to check if model has already been trained
-    binary_model = BinaryModel.objects.get(id=model_id)
+    try:
+        binary_model = BinaryModel.objects.get(id=model_id)
 
-    if request.method != 'POST':
-        train_form = TrainingConfigForm()
+        if request.method != 'POST':
+            train_form = TrainingConfigForm()
 
-    else:
-        train_form = TrainingConfigForm(data=request.POST)
-        # Ensures all fields are fill out etc.
-        if train_form.is_valid():
-            # Create a new TrainingConfig instance.
-            new_tc = train_form.save(commit=False)
+        else:
+            train_form = TrainingConfigForm(data=request.POST)
+            # Ensures all fields are fill out etc.
+            if train_form.is_valid():
+                # Create a new TrainingConfig instance.
+                new_tc = train_form.save(commit=False)
 
-            # Load the model
-            SAVE_MODEL_DIR = binary_model.save_dir
-            SAVED_MODEL_NAME = binary_model.name
+                # Load the model
+                saved_model_path = binary_model.save_dir + '/' + binary_model.name
+                ml_model = keras.models.load_model(saved_model_path)
 
-            ml_model = keras.models.load_model(SAVE_MODEL_DIR + '/' + SAVED_MODEL_NAME)
-            ml_model = ml.compile_model(ml_model)
-            TRAINING_DIR = "/Users/simondornan/Documents/2023/ML_and_CS/01_ML_Path/06_My_ML_Projects/image_classifier/binary_cnn/data/horse-or-human"
-            VALIDATION_DIR = "/Users/simondornan/Documents/2023/ML_and_CS/01_ML_Path/06_My_ML_Projects/image_classifier/binary_cnn/data/validation-horse-or-human"
+                # Compile the model
+                ml_model = ml.compile_model(ml_model)
 
-            # Update the model's status
-            binary_model.status = Status.TRAINING
-            binary_model.save()
-            ml_model = ml.train_model(ml_model, TRAINING_DIR, VALIDATION_DIR)
+                # Update the model's status
+                binary_model.status = Status.TRAINING
+                binary_model.save()
 
-            # Save the ml model to the save dir of the BinaryModel.
-            ml_model.save(SAVE_MODEL_DIR + "/" + SAVED_MODEL_NAME)
+                # Train the model.
+                training_dir = "/Users/simondornan/Documents/2023/ML_and_CS/01_ML_Path/06_My_ML_Projects/image_classifier/binary_cnn/data/horse-or-human"
+                validation_dir = "/Users/simondornan/Documents/2023/ML_and_CS/01_ML_Path/06_My_ML_Projects/image_classifier/binary_cnn/data/validation-horse-or-human"
+                ml_model = ml.train_model(ml_model, training_dir, validation_dir)
 
-            # Update the model's status
-            binary_model.status = Status.TRAINED
-            binary_model.save()
+                # Save the ml model to the save dir of the BinaryModel.
+                ml_model.save(saved_model_path)
 
-            # Associate TrainingConfig's binary_model field with the BinaryModel.
-            new_tc.binary_model = binary_model
-            new_tc.save()
+                # Update the model's status
+                binary_model.status = Status.TRAINED
+                binary_model.save()
 
-            """ ------------------------- parallel thread ----------------------------------------"""
-            # Start the long-running task in a separate thread
-            #with ThreadPoolExecutor() as executor:
-                #executor.submit(long_running_task_test)
+                # Associate TrainingConfig's binary_model field with the BinaryModel.
+                new_tc.binary_model = binary_model
+                new_tc.save()
+                data = {'msg': "Your model has been trained"}
+                return JsonResponse(data)
 
-            #with concurrent.futures.ThreadPoolExecutor(max_workers=2) as executor:
-                # Submit the task to the executor asynchronously
-                # future = executor.submit(train_task(binary_model, new_tc))
-                #future = executor.submit(long_running_task_test)
+        context = {'train_form': train_form, 'binary_model': binary_model}
+        return render(request, 'binary_cnn/train.html', context)
 
-                # Add the callback function to be executed when the result is available
-                #future.add_done_callback(callback_fn)
-
-                # This line of code will be executed immediately after submitting the task
-            #print("Task submitted, continuing with other work...")
-            #return redirect('binary_cnn:models')
-            data = {'msg': "Your model has been trained"}
-            return JsonResponse(data)
-
-    context = {'train_form': train_form, 'binary_model': binary_model}
-    return render(request, 'binary_cnn/train.html', context)
+    except BinaryModel.DoesNotExist:
+        # Handle the case where the object does not exist
+        print("Object does not exist")
+    return redirect('binary_cnn:models')
 
 
 def classify_form(request):

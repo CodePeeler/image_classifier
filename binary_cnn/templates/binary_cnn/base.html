@@ -10,21 +10,20 @@
 
     <a class="navbar-brand" href="{% url 'binary_cnn:home'%}">Home</a>
 
-    <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarCollapse" aria-controls="navbarCollapse" aria-expanded="false" aria-label="Toggle navigation">
-    <span class="navbar-toggler-icon"></span></button>
+    <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarCollapse" aria-controls="navbarCollapse" aria-expanded="false" aria-label="Toggle navigation"><span class="navbar-toggler-icon"></span></button>
 
     <div class="collapse navbar-collapse" id="navbarCollapse">
-      <ul class="navbar-nav mr-auto">
+      <ul class="navbar-nav ml">
         <li class="nav-item">
           <a class="nav-link" href="{% url 'binary_cnn:home'%}">Data</a>
         </li>
       </ul>
-      <ul class="navbar-nav ml-auto">
+      <ul class="navbar-nav ml">
         <li class="nav-item">
           <a class="nav-link" href="{% url 'binary_cnn:models' %}">Models</a>
         </li>
       </ul>
-      <ul class="navbar-nav ml-auto">
+      <ul class="navbar-nav ml">
         <li class="nav-item">
           <a class="nav-link" href="{% url 'binary_cnn:classify_form' %}">Classify</a>
         </li>

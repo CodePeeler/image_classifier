@@ -19,6 +19,12 @@ function getNumOfRowsWithTrainingStatus(){
             statusElements[i].style.color = "red";
             count++;
         }
+        else if(statusText=='Untrained'){
+            statusElements[i].style.color = "orange";
+        }
+        else if (statusText=='Trained'){
+            statusElements[i].style.color = "green";
+        }
     }
     return count
 }
@@ -32,3 +38,10 @@ function refreshPage() {
 // where training is trigger on one tab page then the other page i.e models
 // page will not be updated automatically, i.e. the user must refresh page.
 checkTextValueOnLoad();
+
+function toggleAll(source) {
+    var checkboxes = document.querySelectorAll('input[type="checkbox"]');
+    for (var i = 0; i < checkboxes.length; i++) {
+        checkboxes[i].checked = source.checked;
+    }
+}

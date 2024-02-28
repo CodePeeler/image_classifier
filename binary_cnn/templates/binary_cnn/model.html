@@ -1,0 +1,177 @@
+{% extends "binary_cnn/base.html" %}
+{% block content %}
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Model</title>
+    <style>
+     #nn_img {
+        position: absolute;
+        width: 120px;
+        height: 80px;
+        padding-left: 0px;
+        padding-bottom: 0px;
+        border: 0px solid red;
+      }
+      #nn_svg_box {
+        margin-top: -10px;
+        margin-left: -20px;
+        margin-bottom: 10px;
+        width: 420px;
+        height: 90px;
+        padding-bottom: 20px;
+        border: 0px solid green;
+      }
+      #title {
+        position: absolute;
+        padding-top: 20px;
+        width: 300px;
+        padding-left: 120px;
+        font-size: 40px;
+        border: 0px solid blue;
+      }
+
+      /****** Content *********/
+
+      #wrapper{
+        position: relative;
+        border: 1px solid #a9a9a9;
+        width: 80%;
+        margin: 10%;
+        margin-top: 10px;
+
+        width: 840px;
+        padding: 20px;
+      }
+      #modelButtonContainer {
+        margin: 10px;
+        width: 120px;
+        border: 0px solid blue;
+      }
+      #trainModelButton {
+
+        float: left;
+      }
+      #deleteModelButton {
+
+        float: right;
+      }
+      #columnOne {
+        margin-top: 0px;
+        margin-bottom: 0px;
+        padding: 10px;
+        float: left;
+        width: 400px;
+
+        border: 0px solid red;
+      }
+      #columnTwo {
+        margin-top: 0px;
+        margin-bottom: 0px;
+        margin-left: 0px;
+        padding: 10px;
+        float: left;
+        width: 400px;
+
+        border: 0px solid red;
+      }
+      #divDetails {
+        font-size: 20px;
+        background: #ebf2f6;
+        border: 0px solid green;
+        padding: 10px;
+        border: 1px solid #a9a9a9;
+      }
+      #divDetailsContent {
+        padding: 5px;
+        font-size: 75%;
+        border: 0px solid black;
+      }
+      #divPerformance {
+        margin-top: 20px;
+        font-size: 20px;
+        background: #ebf2f6;
+        border: 0px solid green;
+        padding: 10px;
+        border: 1px solid #a9a9a9;
+      }
+      #divPerformanceContent {
+        padding: 5px;
+        font-size: 75%;
+        border: 0px solid black;
+      }
+      #divParameters {
+        font-size: 20px;
+        background: #ebf2f6;
+        border: 0px solid green;
+        padding: 10px;
+        border: 1px solid #a9a9a9;
+      }
+      #divParametersContent {
+        padding: 5px;
+        font-size: 75%;
+        border: 0px solid black;
+      }
+      .clearFix:after {
+        content: ".";
+        display: block;
+        height: 0;
+        clear: both;
+        visibility: hidden;
+      }
+
+      li {
+        padding: 2px;
+        }
+    </style>
+    {% load static %}
+    <script src="{% static 'js/model.js' %}" defer></script>
+</head>
+<body>
+
+    <div id="wrapper" class="clearFix">
+        <div id="nn_svg_box">
+            <img id="nn_img" src="/static/svg/neural_network5.svg" alt="SVG Image"><div id="title">Model</div>
+        </div>
+        <div id="modelButtonContainer" class="clearFix">
+            <a href="{% url 'binary_cnn:train' binary_model.id%}"><button id="trainModelButton">Train</button></a>
+            <form action = "{% url 'binary_cnn:delete_model' binary_model.id %}" method="post">
+                {% csrf_token %}
+                <button id="deleteModelButton">Delete</button>
+            </form>
+        </div>
+        <div id="colContainer">
+            <div id="columnOne">
+                <div id="divDetails">Details
+                    <div id="divDetailsContent">
+                        <ul>
+                            <li><b>Name:</b> {{binary_model.name}} - <i>(status: {{binary_model.status}})</i></li>
+                            <li><b>Description:</b> {{binary_model.description}}</li>
+                            <li><b>Dataset: </b></li>
+                        </ul>
+                    </div>
+                </div>
+                <div id="divPerformance">Performance
+                    <div id="divPerformanceContent">
+                        <ul>
+                            <!-- NB May not be actual accuracy - it was the accuracy specified for training -->
+                            <li><b>Accuracy:</b> {{training_config.accuracy}}</li>
+                            <li><b>Training time:</b></li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+            <div id="columnTwo">
+                <div id="divParameters">Parameters
+                    <div id="divParametersContent">
+                        <ul>
+                            <li><b>Classification labels:</b> [{{training_config.classification_classes}}]</li>
+                            <li><b>Learning rate:</b> {{training_config.learning_rate}}</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div><!-- end colContainer -->
+    </div>
+</body>
+{% endblock content %}
