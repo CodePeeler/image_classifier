@@ -1,0 +1,52 @@
+{% extends "binary_cnn/base.html" %}
+{% block content %}
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+    <style>
+         #nn_img {
+        position: absolute;
+        width: 120px;
+        height: 80px;
+        padding-left: 0px;
+        padding-bottom: 0px;
+        border: 0px solid red;
+      }
+      #nn_svg_box {
+        width: 420px;
+        height: 90px;
+        padding-left: 0px;
+        border: 0px solid green;
+    }
+      #title {
+        position: absolute;
+        padding-top: 20px;
+        width: 300px;
+        padding-left: 120px;
+        font-size: 30px;
+        border: 0px solid blue;
+    }
+    </style>
+</head>
+<body>
+    <main role="main" class="container">
+      <div id="nn_svg_box">
+        <img id="nn_img" src="/static/svg/neural_network5.svg" alt="SVG Image"><div id="title">Add Dataset</div>
+      </div>
+      <div class="pb-2 mb-2 border-bottom">
+        {% block page_header %}{% endblock page_header %}
+      </div>
+
+    <br>
+    <form  method="post" enctype="multipart/form-data">
+      <h4>Upload a Dataset</h4>
+      {% csrf_token %}
+      {{ form.as_p }}
+      <button class="btn btn-sm btn-primary" type="submit">Add</button>
+    </form>
+
+    </main>
+</body>
+{% endblock content %}
+</html>

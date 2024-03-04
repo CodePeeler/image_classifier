@@ -1,5 +1,12 @@
 from django import forms
-from .models import BinaryModel, TrainingConfig, Image
+from .models import Dataset, BinaryModel, TrainingConfig, Image
+
+
+class DatasetForm(forms.ModelForm):
+    class Meta:
+        model = Dataset
+        fields = ['save_dir', 'class_labels', 'type', 'input_shape', 'category']
+        labels = {'save_dir': '', 'class_labels': 'labels', 'type': 'Type', 'input_shape': 'Shape', 'category': 'Category'}
 
 
 class BinaryModelForm(forms.ModelForm):

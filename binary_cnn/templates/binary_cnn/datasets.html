@@ -1,0 +1,124 @@
+{% extends "binary_cnn/base.html" %}
+{% block content %}
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Datasets</title>
+    <style>
+        #nn_img {
+        position: absolute;
+        width: 120px;
+        height: 80px;
+        padding-left: 0px;
+        padding-bottom: 0px;
+        border: 0px solid red;
+    }
+      #nn_svg_box {
+        width: 420px;
+        height: 90px;
+        padding-left: 0px;
+        border: 0px solid green;
+    }
+        #title {
+        position: absolute;
+        padding-top: 20px;
+        width: 300px;
+        padding-left: 120px;
+        font-size: 30px;
+        border: 0px solid blue;
+    }
+        #modelButtonContainer {
+        margin: 0px;
+        width: 130px;
+        border: 0px solid blue;
+    }
+      #addDatasetButton {
+        width: 61px;
+        float: right;
+    }
+      #deleteDatasetButton {
+        width: 61px;
+        #margin-top; 20px;
+        float: left;
+        margin-top: 23px;
+        border: 1px solid gray;
+    }
+
+        #link_create {
+            padding: 10px;
+            padding-bottom: 40px;
+    }
+        table {
+            border-collapse: collapse;
+            #width: 60%;
+    }
+        th, td {
+            border: 1px solid #dddddd;
+            text-align: left;
+            padding: 8px;
+    }
+        th {
+            background-color: #f2f2f2;
+    }
+        .status {
+            color: green;
+            #border: 0px solid green;
+    }
+        .clearFix:after {
+        content: ".";
+        display: block;
+        height: 0;
+        clear: both;
+        visibility: hidden;
+    }
+    </style>
+</head>
+<body>
+  <main role="main" class="container">
+
+    <div id="nn_svg_box">
+      <img id="nn_img" src="/static/svg/neural_network5.svg" alt="SVG Image"><div id="title">Datasets</div>
+    </div>
+    <div class="pb-2 mb-2 border-bottom">
+      {% block page_header %}{% endblock page_header %}
+    </div>
+
+    <br>
+    <div id="modelButtonContainer" class="clearFix">
+      <form id="myForm" onsubmit="deleteModels()">
+        {% csrf_token %}
+        <!-- Other form fields here -->
+        <button id="deleteDatasetButton" class="btn btn-sm btn-secondary" type="submit" >Delete</button>
+      </form><br>
+      <a href="{% url 'binary_cnn:add_dataset' %}"><button class="btn btn-sm btn-primary" id="addDatasetButton">Add</button></a>
+    </div>
+
+    <input type="checkbox" onclick="toggleAll(this)"/> Select All
+      <div class="card mb-3">
+          <table>
+            <thead>
+                <tr>
+                    <th></th>
+                    <th>Name</th>
+                    <th>Category</th>
+                    <th>Date</th>
+                    <th>Type</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for dataset in datasets %}
+                <tr>
+                    <td><input type="checkbox" class="rowCheckbox" data-id="{{dataset.id}}"/></td>
+                    <td><a class="nav-link" href="{% url 'binary_cnn:datasets' %}">{{ dataset.name }}</a></td>
+                    <td>{{ dataset.category }}</td>
+                    <td>{{ dataset.date_added|date:'M d, Y H:i'  }}</td>
+                    <td>{{ dataset.type }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+          </table>
+      </div>
+  </main>
+</body>
+{% endblock content %}
+</html>

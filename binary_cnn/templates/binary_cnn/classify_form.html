@@ -1,27 +1,60 @@
 {% extends "binary_cnn/base.html" %}
 {% block content %}
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <title>Classify form</title>
+    <style>
+      #nn_img {
+        position: absolute;
+        width: 120px;
+        height: 80px;
+        padding-left: 0px;
+        padding-bottom: 0px;
+        border: 0px solid red;
+      }
+      #nn_svg_box {
+        width: 420px;
+        height: 90px;
+        padding-left: 0px;
+        border: 0px solid green;
+      }
+      #title {
+        position: absolute;
+        padding-top: 20px;
+        width: 420px;
+        padding-left: 120px;
+        font-size: 30px;
+        border: 0px solid blue;
+      }
+    </style>
 </head>
 <body>
+  <main role="main" class="container">
 
-  <h2 class="display-4">Classify an Image</h2><br>
+  <div id="nn_svg_box">
+    <img id="nn_img" src="/static/svg/neural_network5.svg" alt="SVG Image"><div id="title">Classify</div>
+  </div>
+  <div class="pb-2 mb-2 border-bottom">
+    {% block page_header %}{% endblock page_header %}
+  </div>
 
+  <br>
   <form  method="post" enctype="multipart/form-data">
-    <h4 class="display-4">Step 1: Select a Model</h4>
+    <h4>Step 1: Select a Model</h4>
     {% for trained_model in trained_models %}
-      <div class="card mb-3">
+      <div>
         <input type="radio" id="trained_model" name="model_id" value="{{trained_model.id}}">
         <label for="trained_model">{{ trained_model.name }}</label>
       </div>
     {% endfor %}
     <br>
     <br>
-    <h4 class="display-4">Step 2: Upload an Image</h4>
+    <h4>Step 2: Upload an Image</h4>
     {% csrf_token %}
     {{ form.as_p }}
     <button type="submit">Classify</button>
   </form>
+  </main>
 </body>
 {% endblock content %}

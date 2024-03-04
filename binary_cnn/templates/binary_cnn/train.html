@@ -4,6 +4,28 @@
     <meta charset="UTF-8">
     <title>Train</title>
     <style>
+         #nn_img {
+        position: absolute;
+        width: 120px;
+        height: 80px;
+        padding-left: 0px;
+        padding-bottom: 0px;
+        border: 0px solid red;
+      }
+       #nn_svg_box {
+        width: 420px;
+        height: 90px;
+        padding-left: 0px;
+        border: 0px solid green;
+    }
+        #title {
+        position: absolute;
+        padding-top: 20px;
+        width: 300px;
+        padding-left: 120px;
+        font-size: 30px;
+        border: 0px solid blue;
+    }
         #text_box{
           visibility: hidden;
           font-family: "Lucida Console", "Courier New";
@@ -42,8 +64,18 @@
     <script src="{% static 'js/train.js' %}" defer></script>
 </head>
 <body>
-<h1>Train</h1>
-    <h4>{{binary_model.name}}</h4>
+   <main role="main" class="container">
+
+      <div id="nn_svg_box">
+        <img id="nn_img" src="/static/svg/neural_network5.svg" alt="SVG Image"><div id="title">Train Model</div>
+      </div>
+      <div class="pb-2 mb-2 border-bottom">
+       {% block page_header %}{% endblock page_header %}
+      </div>
+
+       <br>
+       <div>Model: <b>{{binary_model.name}}</b></div>
+       <br>
 
     <!-- form id="train_form" action = "{% url 'binary_cnn:train' binary_model.id %}" method='post' -->
   <form id="train_form" action="/submit" method='post'>
@@ -65,6 +97,6 @@
   </form>
   <br>
   <div id="message"></div>
-
+   </main>
 </body>
 {% endblock content %}

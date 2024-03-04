@@ -1,9 +1,36 @@
+{% load bootstrap4 %}
 <!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
   <title>Binary CNN</title>
+  {% bootstrap_css %}
+  {% bootstrap_javascript jquery='full' %}
+  <style>
+        #nn_img {
+        position: absolute;
+        width: 120px;
+        height: 80px;
+        padding-left: 0px;
+        padding-bottom: 0px;
+        border: 0px solid red;
+    }
+      #nn_svg_box {
+        width: 420px;
+        height: 90px;
+        padding-left: 0px;
+        border: 0px solid green;
+    }
+        #title {
+        position: absolute;
+        padding-top: 20px;
+        width: 300px;
+        padding-left: 120px;
+        font-size: 30px;
+        border: 0px solid blue;
+    }
+    </style>
 </head>
 <body>
   <nav class="navbar navbar-expand-md navbar-light bg-light mb-4 border">
@@ -15,7 +42,7 @@
     <div class="collapse navbar-collapse" id="navbarCollapse">
       <ul class="navbar-nav ml">
         <li class="nav-item">
-          <a class="nav-link" href="{% url 'binary_cnn:home'%}">Data</a>
+          <a class="nav-link" href="{% url 'binary_cnn:datasets'%}">Datasets</a>
         </li>
       </ul>
       <ul class="navbar-nav ml">
@@ -31,13 +58,13 @@
     </div>
   </nav>
   <main role="main" class="container">
-    <div class="pb-2 mb-2 border-bottom">
-      {% block page_header %}{% endblock page_header %}
-    </div>
-    <div>
-      {% block content %}{% endblock content %}
-    </div>
-  </main>
-
+        <div>
+            {% block page_header %}{% endblock page_header %}
+        </div>
+        <div>
+            {% block content %}{% endblock content %}
+        </div>
+    </main>
 </body>
+
 </html>

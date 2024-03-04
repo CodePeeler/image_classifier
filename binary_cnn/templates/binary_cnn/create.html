@@ -4,6 +4,28 @@
     <meta charset="UTF-8">
     <title>Create</title>
     <style>
+       #nn_img {
+        position: absolute;
+        width: 120px;
+        height: 80px;
+        padding-left: 0px;
+        padding-bottom: 0px;
+        border: 0px solid red;
+      }
+       #nn_svg_box {
+        width: 420px;
+        height: 90px;
+        padding-left: 0px;
+        border: 0px solid green;
+    }
+        #title {
+        position: absolute;
+        padding-top: 20px;
+        width: 300px;
+        padding-left: 120px;
+        font-size: 30px;
+        border: 0px solid blue;
+    }
       #message {
         font-size: 14px;
       }
@@ -18,8 +40,17 @@
     <script src="{% static 'js/create.js' %}" defer></script>
 </head>
 <body>
-  <h1 id="heading">Create a Model</h1>
-  <!-- The form for Creating a new model. -->
+  <main role="main" class="container">
+
+    <div id="nn_svg_box">
+      <img id="nn_img" src="/static/svg/neural_network5.svg" alt="SVG Image"><div id="title">Create Model</div>
+    </div>
+    <div class="pb-2 mb-2 border-bottom">
+      {% block page_header %}{% endblock page_header %}
+    </div>
+
+
+  <br>
   <form id="create_form" action="/submit" method='post'>
     {% csrf_token %}
     {{ create_form.as_p }}
@@ -42,6 +73,6 @@
   <br>
   <pre id="fileContent"></pre>
 
-
+  </main>
 </body>
 {% endblock content %}

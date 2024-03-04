@@ -1,21 +1,76 @@
 import os
+import json
+import zipfile
 
 import keras
 from django.http import JsonResponse
 from django.shortcuts import render, redirect
 
 import binary_cnn.ml_cnn as ml
-from binary_cnn.forms import BinaryModelForm, TrainingConfigForm, ImageForm
-from binary_cnn.models import Status, BinaryModel, Image, TrainingConfig
+from binary_cnn.forms import DatasetForm, BinaryModelForm, TrainingConfigForm, ImageForm
+from binary_cnn.models import DSType, DSCategory, Dataset, Status, BinaryModel, Image, TrainingConfig
+import binary_cnn.utilities as util
 
 
 def home(request):
     return render(request, 'binary_cnn/home.html')
 
 
+def start(request):
+    return render(request, 'binary_cnn/get_started.html')
+
+
+def datasets(request):
+    # Get all datasets.
+    data_sets = Dataset.objects.order_by('-date_added')
+
+    context = {'datasets': data_sets}
+    return render(request, 'binary_cnn/datasets.html', context)
+
+
+def add_dataset(request):
+    if request.method != 'POST':
+        # No data submitted, create a blank form.
+        form = DatasetForm()
+    else:
+        # POST data submitted; process data.
+        form = DatasetForm(data=request.POST, files=request.FILES)
+        if form.is_valid():
+            new_dataset = form.save(commit=False)
+            try:
+                # Set dataset's name equal to file name - minus ext.
+                ds_name = new_dataset.save_dir.name.split('.')[0]
+                new_dataset.name = ds_name
+                new_dataset.save()
+
+                # Extract zip from the default tmp folder to dataset root dir.
+                zip_ref = zipfile.ZipFile(new_dataset.save_dir, 'r')
+                ds_root = new_dataset.save_dir.name.split('tmp')[0]+new_dataset.name
+                zip_ref.extractall(ds_root)
+                zip_ref.close()
+
+                # Update the dataset's save_dir to point to the dataset root dir.
+                new_dataset.save_dir = ds_root
+                new_dataset.save()
+
+            except zipfile.BadZipFile:
+                new_dataset.delete()
+                raise ValueError("The file is not a valid zip file.")
+            except Exception as e:
+                print(f"Error adding dataset : {e}")
+            finally:
+                # clear tmp folder.
+                util.rm_files('binary_cnn/datasets/tmp')
+
+        return redirect('binary_cnn:datasets')
+
+    context = {'form': form}
+    return render(request, 'binary_cnn/add_dataset.html', context)
+
+
 def models(request):
     # Get all the trained models.
-    binary_models = BinaryModel.objects.all()
+    binary_models = BinaryModel.objects.order_by('-date_added')
 
     context = {'binary_models': binary_models}
     return render(request, 'binary_cnn/models.html', context)
@@ -36,7 +91,27 @@ def model(request, model_id):
     return redirect('binary_cnn:models')
 
 
+def delete_models(request):
+    # Delete a batch of BinaryModel instances.
+    raw_body = request.body
+    body_str = raw_body.decode('utf-8')
+    json_data = json.loads(body_str)
+    ids = json_data.get('ids')
+
+    for model_id in ids:
+        try:
+            binary_model = BinaryModel.objects.get(id=model_id)
+            binary_model.delete()
+        except BinaryModel.DoesNotExist:
+            print("Object does not exist")
+
+    # Doesn't refresh page!!!
+    return redirect('binary_cnn:models')
+
+
+# TODO Do you really need this method - could just use the above!
 def delete_model(model_id):
+    # Delete a single BinaryModel instances.
     try:
         binary_model = BinaryModel.objects.get(id=model_id)
         binary_model.delete()

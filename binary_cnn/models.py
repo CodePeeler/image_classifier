@@ -6,6 +6,47 @@ from django.db.models.signals import pre_delete
 from django.dispatch import receiver
 
 
+class DSType(models.TextChoices):
+    IMAGE = 'Image'
+    TEXT = 'Text'
+    AUDIO = 'Audio'
+    VIDEO = 'Video'
+
+
+class DSCategory(models.TextChoices):
+    TRAINING = 'Training'
+    VALIDATION = 'Validation'
+    CLASSIFY = 'Classify'
+    OTHER = 'Other'
+
+
+class Dataset(models.Model):
+    name = models.CharField(max_length=200, unique=True)
+    save_dir = models.FileField(max_length=100, upload_to='binary_cnn/datasets/tmp')
+    type = models.CharField(max_length=10, choices=DSType.choices)
+    category = models.CharField(max_length=10, choices=DSCategory.choices)
+    input_shape = models.CharField(max_length=255, blank=True)
+    date_added = models.DateTimeField(auto_now=True)
+
+    # Necessary for Supervised Learning.
+    class_labels = models.CharField(max_length=2000, blank=True)
+
+    def __str__(self):
+        """Return a string representation of the model. """
+        return self.name
+
+
+@receiver(pre_delete, sender=Dataset)
+def delete_dataset_file(sender, instance, **kwargs):
+    # Check if the instances save_dir exits.
+    if instance.save_dir:
+        # Get the path to zip file
+        ds_zip_path = instance.save_dir.path
+        # Check if the zip file exists and delete it
+        if os.path.exists(ds_zip_path):
+            os.remove(ds_zip_path)
+
+
 class Status(models.TextChoices):
     UNTRAINED = 'Untrained'
     TRAINING = 'Training'
@@ -51,6 +92,7 @@ class TrainingConfig(models.Model):
     training_ds_dir = models.CharField(null=True, max_length=200)
     validation_ds_dir = models.CharField(null=True, max_length=200)
 
+    #TODO: Delete this field.
     classification_classes = models.CharField(max_length=1000)
 
     learning_rate = models.DecimalField(max_digits=10, decimal_places=8)
