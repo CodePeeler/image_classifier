@@ -27,6 +27,7 @@ class Dataset(models.Model):
     category = models.CharField(max_length=10, choices=DSCategory.choices)
     input_shape = models.CharField(max_length=255, blank=True)
     date_added = models.DateTimeField(auto_now=True)
+    is_active = models.BooleanField(default=False)
 
     # Necessary for Supervised Learning.
     class_labels = models.CharField(max_length=2000, blank=True)
@@ -37,14 +38,14 @@ class Dataset(models.Model):
 
 
 @receiver(pre_delete, sender=Dataset)
-def delete_dataset_file(sender, instance, **kwargs):
+def delete_dataset_dir(sender, instance, **kwargs):
     # Check if the instances save_dir exits.
     if instance.save_dir:
-        # Get the path to zip file
-        ds_zip_path = instance.save_dir.path
-        # Check if the zip file exists and delete it
-        if os.path.exists(ds_zip_path):
-            os.remove(ds_zip_path)
+        # Get path to datasets root dir
+        path = instance.save_dir.name
+        # Ensure path still exists
+        if os.path.exists(path):
+            shutil.rmtree(path)
 
 
 class Status(models.TextChoices):
@@ -86,19 +87,16 @@ def delete_binary_model_file(sender, instance, **kwargs):
         os.remove(instance.path_model_summary)
 
 
-# BinaryModels are trained upon creation
-class TrainingConfig(models.Model):
-    # name = models.CharField(max_length=100)
-    training_ds_dir = models.CharField(null=True, max_length=200)
-    validation_ds_dir = models.CharField(null=True, max_length=200)
-
-    #TODO: Delete this field.
-    classification_classes = models.CharField(max_length=1000)
-
-    learning_rate = models.DecimalField(max_digits=10, decimal_places=8)
-    accuracy = models.DecimalField(max_digits=10, decimal_places=8)
-
+class TrainConfig(models.Model):
     binary_model = models.OneToOneField(BinaryModel, on_delete=models.CASCADE)
+
+    training_ds = models.ForeignKey(Dataset, on_delete=models.PROTECT, related_name='config_training_ds')
+    validation_ds = models.ForeignKey(Dataset, on_delete=models.PROTECT, related_name='config_validation_ds')
+
+    learning_rate = models.DecimalField(default=0.001, max_digits=10, decimal_places=8)
+    minimum_accuracy = models.DecimalField(default=0.99, max_digits=10, decimal_places=8)
+    num_of_batches = models.IntegerField(default=8)
+    num_of_epochs = models.IntegerField(default=15)
 
     def __str__(self):
         """Return a string representation of the model. """
@@ -128,6 +126,3 @@ def delete_image_file(sender, instance, **kwargs):
         # Check if the image file exists and delete it
         if os.path.exists(image_path):
             os.remove(image_path)
-
-
-

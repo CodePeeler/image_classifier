@@ -26,13 +26,24 @@
         font-size: 30px;
         border: 0px solid blue;
     }
-      #message {
-        font-size: 14px;
+      #buttonContainer {
+        margin: 0px;
+        width: 250px;
+        border: 0px solid blue;
       }
       #back_to_models_button {
         visibility: hidden;
+        float: left;
       }
       #train_button {
+        visibility: hidden;
+        float: right;
+      }
+      .clearFix:after {
+        content: ".";
+        display: block;
+        height: 0;
+        clear: both;
         visibility: hidden;
       }
     </style>
@@ -54,25 +65,27 @@
   <form id="create_form" action="/submit" method='post'>
     {% csrf_token %}
     {{ create_form.as_p }}
-    <button name="submit" type="submit">Create model</button>
+    <button name="submit" class="btn btn-sm btn-primary" type="submit">Create</button>
   </form>
+
+  <div id="model_created_msg"></div>
+  <br>
+  <div id="buttonContainer" class="clearFix">
+      <form action = "{% url 'binary_cnn:models' %}" method="post" >
+          {% csrf_token %}
+          <button id="back_to_models_button" class="btn btn-sm btn-secondary">Back to Models</button>
+      </form>
+      <form>
+          <input type="hidden" id="hidden_model_id" name="hidden_model_id" value="">
+          <button type="button" id="train_button" class="btn btn-sm btn-primary" onclick="trainRequest()">Train this Model</button>
+      </form>
+  </div>
 
   <br>
-
-  <form action = "{% url 'binary_cnn:models' %}" method="post" >
-      {% csrf_token %}
-      <button id="back_to_models_button">Back to Models</button>
-  </form>
   <br>
-
-  <form>
-      <input type="hidden" id="hidden_model_id" name="hidden_model_id" value="">
-      <button type="button" id="train_button" onclick="trainRequest()">Train this Model</button>
-  </form>
-
+  <div id="arch_summary"><b></b></div>
   <br>
   <pre id="fileContent"></pre>
-
   </main>
 </body>
 {% endblock content %}

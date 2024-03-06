@@ -38,9 +38,9 @@
         {% block page_header %}{% endblock page_header %}
       </div>
 
-    <br>
-    <form  method="post" enctype="multipart/form-data">
-      <h4>Upload a Dataset</h4>
+    <br> <br>
+    <form  class="form" method="post" enctype="multipart/form-data">
+
       {% csrf_token %}
       {{ form.as_p }}
       <button class="btn btn-sm btn-primary" type="submit">Add</button>

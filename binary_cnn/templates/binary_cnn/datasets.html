@@ -72,6 +72,8 @@
         visibility: hidden;
     }
     </style>
+    {% load static %}
+    <script src="{% static 'js/datasets.js' %}" defer></script>
 </head>
 <body>
   <main role="main" class="container">
@@ -85,7 +87,7 @@
 
     <br>
     <div id="modelButtonContainer" class="clearFix">
-      <form id="myForm" onsubmit="deleteModels()">
+      <form id="myForm" onsubmit="deleteDatasets()">
         {% csrf_token %}
         <!-- Other form fields here -->
         <button id="deleteDatasetButton" class="btn btn-sm btn-secondary" type="submit" >Delete</button>
@@ -101,18 +103,23 @@
                     <th></th>
                     <th>Name</th>
                     <th>Category</th>
-                    <th>Date</th>
+                    <th>Labels</th>
                     <th>Type</th>
+                    <th>Shape</th>
+                    <th>Date</th>
+
                 </tr>
             </thead>
             <tbody>
                 {% for dataset in datasets %}
                 <tr>
                     <td><input type="checkbox" class="rowCheckbox" data-id="{{dataset.id}}"/></td>
-                    <td><a class="nav-link" href="{% url 'binary_cnn:datasets' %}">{{ dataset.name }}</a></td>
+                    <td>{{ dataset.name }}</td>
                     <td>{{ dataset.category }}</td>
-                    <td>{{ dataset.date_added|date:'M d, Y H:i'  }}</td>
+                    <td>[{{ dataset.class_labels }}]</td>
                     <td>{{ dataset.type }}</td>
+                    <td>({{ dataset.input_shape }})</td>
+                    <td>{{ dataset.date_added|date:'M d, Y H:i'  }}</td>
                 </tr>
                 {% endfor %}
             </tbody>

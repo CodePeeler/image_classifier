@@ -1,5 +1,6 @@
 // Fetch API to update page on submit of form.
 document.getElementById('create_form').addEventListener('submit', function(event) {
+
     event.preventDefault(); // Prevent default form submission
 
     // Get form data
@@ -25,9 +26,13 @@ document.getElementById('create_form').addEventListener('submit', function(event
         document.getElementById('back_to_models_button').style.visibility = "visible";
         document.getElementById('train_button').style.visibility = "visible";
 
-        // Update the h1 heading.
-        var headingElement = document.getElementById("heading");
-        headingElement.textContent = data.msg;
+        // Update model_created_msg div.
+        var createdMsgElement = document.getElementById("model_created_msg");
+        createdMsgElement.textContent = data.msg;
+
+        // Display summary title
+        var archSummaryElement = document.getElementById("arch_summary");
+        archSummaryElement.textContent = "Model Architecture Summary";
 
         displayFileContent(data.model_summary_txt)
 

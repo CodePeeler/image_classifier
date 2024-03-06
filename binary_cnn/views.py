@@ -7,8 +7,8 @@ from django.http import JsonResponse
 from django.shortcuts import render, redirect
 
 import binary_cnn.ml_cnn as ml
-from binary_cnn.forms import DatasetForm, BinaryModelForm, TrainingConfigForm, ImageForm
-from binary_cnn.models import DSType, DSCategory, Dataset, Status, BinaryModel, Image, TrainingConfig
+from binary_cnn.forms import DatasetForm, BinaryModelForm, TrainConfigForm, ImageForm
+from binary_cnn.models import DSType, DSCategory, Dataset, Status, BinaryModel, Image, TrainConfig
 import binary_cnn.utilities as util
 
 
@@ -68,6 +68,24 @@ def add_dataset(request):
     return render(request, 'binary_cnn/add_dataset.html', context)
 
 
+def delete_datasets(request):
+    # Delete a batch of BinaryModel instances.
+    raw_body = request.body
+    body_str = raw_body.decode('utf-8')
+    json_data = json.loads(body_str)
+    ids = json_data.get('ids')
+
+    for dataset_id in ids:
+        try:
+            dataset = Dataset.objects.get(id=dataset_id)
+            dataset.delete()
+        except Dataset.DoesNotExist:
+            print("Dataset does not exist")
+
+    # Doesn't refresh page!!!
+    return redirect('binary_cnn:datasets')
+
+
 def models(request):
     # Get all the trained models.
     binary_models = BinaryModel.objects.order_by('-date_added')
@@ -80,10 +98,10 @@ def model(request, model_id):
     try:
         # Get the requested model
         binary_model = BinaryModel.objects.get(id=model_id)
-        training_config = None
+        train_config = None
         if binary_model.status == Status.TRAINED:
-            training_config = TrainingConfig.objects.get(binary_model=binary_model)
-        context = {'binary_model': binary_model, 'training_config': training_config}
+            train_config = TrainConfig.objects.get(binary_model=binary_model)
+        context = {'binary_model': binary_model, 'train_config': train_config}
         return render(request, 'binary_cnn/model.html', context)
     except BinaryModel.DoesNotExist:
         # Handle the case where the object does not exist
@@ -92,10 +110,8 @@ def model(request, model_id):
 
 
 def delete_models(request):
-    # Delete a batch of BinaryModel instances.
-    raw_body = request.body
-    body_str = raw_body.decode('utf-8')
-    json_data = json.loads(body_str)
+    json_data_str = request.POST.get('json')
+    json_data = json.loads(json_data_str)
     ids = json_data.get('ids')
 
     for model_id in ids:
@@ -103,14 +119,15 @@ def delete_models(request):
             binary_model = BinaryModel.objects.get(id=model_id)
             binary_model.delete()
         except BinaryModel.DoesNotExist:
-            print("Object does not exist")
+            print("BinaryModel does not exist")
 
-    # Doesn't refresh page!!!
-    return redirect('binary_cnn:models')
+    # Return json.
+    data = {'msg': 'Models deleted!'}
+    return JsonResponse(data)
 
 
 # TODO Do you really need this method - could just use the above!
-def delete_model(model_id):
+def delete_model(request, model_id):
     # Delete a single BinaryModel instances.
     try:
         binary_model = BinaryModel.objects.get(id=model_id)
@@ -167,14 +184,22 @@ def train(request, model_id):
         binary_model = BinaryModel.objects.get(id=model_id)
 
         if request.method != 'POST':
-            train_form = TrainingConfigForm()
+            train_form = TrainConfigForm()
 
         else:
-            train_form = TrainingConfigForm(data=request.POST)
+            train_form = TrainConfigForm(data=request.POST)
             # Ensures all fields are fill out etc.
             if train_form.is_valid():
+
+                # If retraining then delete old TrainConfig (BM to TC is 1 to 1)
+                if binary_model.status == Status.TRAINED:
+                    old_train_config = TrainConfig.objects.get(binary_model=model_id)
+                    old_train_config.delete()
+                    binary_model.status = Status.UNTRAINED
+                    binary_model.save()
+
                 # Create a new TrainingConfig instance.
-                new_tc = train_form.save(commit=False)
+                train_config = train_form.save(commit=False)
 
                 # Load the model
                 saved_model_path = binary_model.save_dir + '/' + binary_model.name
@@ -188,8 +213,8 @@ def train(request, model_id):
                 binary_model.save()
 
                 # Train the model.
-                training_dir = "/Users/simondornan/Documents/2023/ML_and_CS/01_ML_Path/06_My_ML_Projects/image_classifier/binary_cnn/data/horse-or-human"
-                validation_dir = "/Users/simondornan/Documents/2023/ML_and_CS/01_ML_Path/06_My_ML_Projects/image_classifier/binary_cnn/data/validation-horse-or-human"
+                training_dir = train_config.training_ds.save_dir.name
+                validation_dir = train_config.validation_ds.save_dir.name
                 ml_model = ml.train_model(ml_model, training_dir, validation_dir)
 
                 # Save the ml model to the save dir of the BinaryModel.
@@ -200,8 +225,8 @@ def train(request, model_id):
                 binary_model.save()
 
                 # Associate TrainingConfig's binary_model field with the BinaryModel.
-                new_tc.binary_model = binary_model
-                new_tc.save()
+                train_config.binary_model = binary_model
+                train_config.save()
                 data = {'msg': "Your model has been trained"}
                 return JsonResponse(data)
 
@@ -252,10 +277,10 @@ def classify_result(request, image_id):
         bm_path = os.path.join(binary_model.save_dir, binary_model.name)
 
         # Get binary model's training config.
-        training_config = TrainingConfig.objects.filter(binary_model=binary_model)[0]
+        train_config = TrainConfig.objects.get(binary_model=binary_model.id)
 
         # Get the datasets classes - used for classification of images.
-        classes = training_config.classification_classes.split(',')
+        classes = train_config.training_ds.class_labels.split(',')
 
         #CLASS_DESC = ['horse', 'human']
         my_model = keras.models.load_model(bm_path)

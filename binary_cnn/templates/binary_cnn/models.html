@@ -89,7 +89,7 @@
 
   <br>
   <div id="modelButtonContainer" class="clearFix">
-      <form id="myForm" onsubmit="deleteModels()">
+      <form id="myForm" action="/submit"  method='post'>
         {% csrf_token %}
         <!-- Other form fields here -->
         <button id="deleteModelButton" class="btn btn-sm btn-secondary" type="submit" >Delete</button>

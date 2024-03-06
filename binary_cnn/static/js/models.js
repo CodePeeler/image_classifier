@@ -1,14 +1,7 @@
-// Function to check the text value on load
-function checkTextValueOnLoad() {
-    // Initialise.
-    var numOfRowsWithTrainingStatus = getNumOfRowsWithTrainingStatus()
-
-    if(numOfRowsWithTrainingStatus > 0) {
-        setTimeout(refreshPage, 2000);
-    }
-}
-
-// Gets the count and set all in training to have red text.
+// Return the count for rows that have status of Training.
+// Set Training text color to red.
+// Set Untrained text color to orange.
+// Set Trained text color to green.
 function getNumOfRowsWithTrainingStatus(){
     var count = 0;
     var statusElements = document.getElementsByClassName("status")
@@ -33,11 +26,20 @@ function refreshPage() {
     window.location.reload();
 }
 
+
 // Check if any model's status is in 'training' and if so keep refreshing
-// page until the status changes. Note, not affective for multi tabs use;
-// where training is trigger on one tab page then the other page i.e models
-// page will not be updated automatically, i.e. the user must refresh page.
+// page until the status changes.
+function checkTextValueOnLoad() {
+    // Initialise.
+    var numOfRowsWithTrainingStatus = getNumOfRowsWithTrainingStatus()
+
+    if(numOfRowsWithTrainingStatus > 0) {
+        setTimeout(refreshPage, 2000);
+    }
+}
+
 checkTextValueOnLoad();
+
 
 function toggleAll(source) {
     var checkboxes = document.querySelectorAll('input[type="checkbox"]');
@@ -47,7 +49,11 @@ function toggleAll(source) {
 }
 
 
-function deleteModels() {
+// Fetch API to update page on submit of form.
+document.getElementById('myForm').addEventListener('submit', function(event) {
+
+    event.preventDefault(); // Prevent default form submission
+
     // Get all checkboxes
     var checkboxes = document.querySelectorAll('.rowCheckbox');
     // Array to store IDs of selected rows to delete
@@ -61,34 +67,30 @@ function deleteModels() {
         }
     });
 
-    // Make API call to delete objects from server
+    // Make API call to delete models from server
     if (idsToDelete.length > 0) {
-        // Assuming there's an API endpoint "/delete_objects" to delete objects
-
         var data = { ids: idsToDelete };
 
-        // Make a POST request to the API endpoint
-        const csrfToken = document.querySelector('input[name="csrfmiddlewaretoken"]').value;
+        // Get form data
+        const formData = new FormData(this);
+
+        formData.append('json', JSON.stringify(data));
+
+        // Send form data to the server
         fetch('delete/', {
             method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'X-CSRFToken': csrfToken
-            },
-            body: JSON.stringify(data)
+            body: formData
         })
-        .then(response => {
-            if (response.ok) {
-                // Delete selected rows from table if API call is successful
-                idsToDelete.forEach(function(id) {
-                    document.querySelector('[data-id="' + id + '"]').closest('tr').remove();
-                });
-            } else {
-                console.error('Error deleting objects:', response.statusText);
-            }
+        .then(response => response.json())
+        .then(data => {
+            console.log(data)
+            // Delete selected rows from table if API call is successful
+            idsToDelete.forEach(function(id) {
+                document.querySelector('[data-id="' + id + '"]').closest('tr').remove();
+            });
         })
         .catch(error => {
-            console.error('Error deleting objects:', error);
+            console.error('Error:', error);
         });
     }
-}
+});
