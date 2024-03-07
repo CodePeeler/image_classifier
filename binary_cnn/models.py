@@ -56,9 +56,9 @@ class Status(models.TextChoices):
 
 
 class BinaryModel(models.Model):
-    #bm_owner = models.ForeignKey(User, on_delete=models.CASCADE)
     name = models.CharField(max_length=100)
     description = models.TextField()
+
     # Updates date anytime bm is saved.
     date_added = models.DateTimeField(auto_now=True)
 
@@ -114,6 +114,8 @@ class Image(models.Model):
     def __str__(self):
         """Return a string representation the type of model. """
         return self.img_file.name.split('/')[-1]
+
+
 
 
 #  Delete Image on file system on delete of instances.

@@ -87,15 +87,16 @@
 
     <br>
     <div id="modelButtonContainer" class="clearFix">
-      <form id="myForm" onsubmit="deleteDatasets()">
+      <form id="myForm" action="/submit" method="post">
         {% csrf_token %}
         <!-- Other form fields here -->
         <button id="deleteDatasetButton" class="btn btn-sm btn-secondary" type="submit" >Delete</button>
-      </form><br>
+      </form>
+      <br>
       <a href="{% url 'binary_cnn:add_dataset' %}"><button class="btn btn-sm btn-primary" id="addDatasetButton">Add</button></a>
     </div>
 
-    <input type="checkbox" onclick="toggleAll(this)"/> Select All
+    <input type="checkbox" onclick="toggleAll(this)"/> Select All<div id="error_msg"></div>
       <div class="card mb-3">
           <table>
             <thead>
@@ -107,7 +108,7 @@
                     <th>Type</th>
                     <th>Shape</th>
                     <th>Date</th>
-
+                    <th>In use</th>
                 </tr>
             </thead>
             <tbody>
@@ -120,6 +121,7 @@
                     <td>{{ dataset.type }}</td>
                     <td>({{ dataset.input_shape }})</td>
                     <td>{{ dataset.date_added|date:'M d, Y H:i'  }}</td>
+                    <td>{{ dataset.is_active }}</td>
                 </tr>
                 {% endfor %}
             </tbody>

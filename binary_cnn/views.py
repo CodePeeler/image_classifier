@@ -3,6 +3,7 @@ import json
 import zipfile
 
 import keras
+from django.db.models import ProtectedError
 from django.http import JsonResponse
 from django.shortcuts import render, redirect
 
@@ -21,10 +22,8 @@ def start(request):
 
 
 def datasets(request):
-    # Get all datasets.
-    data_sets = Dataset.objects.order_by('-date_added')
-
-    context = {'datasets': data_sets}
+    # Get all datasets - order by date.
+    context = {'datasets': Dataset.objects.order_by('-date_added')}
     return render(request, 'binary_cnn/datasets.html', context)
 
 
@@ -69,21 +68,24 @@ def add_dataset(request):
 
 
 def delete_datasets(request):
-    # Delete a batch of BinaryModel instances.
-    raw_body = request.body
-    body_str = raw_body.decode('utf-8')
-    json_data = json.loads(body_str)
+    json_data_str = request.POST.get('json')
+    json_data = json.loads(json_data_str)
     ids = json_data.get('ids')
 
-    for dataset_id in ids:
+    for ds_id in ids:
         try:
-            dataset = Dataset.objects.get(id=dataset_id)
+            dataset = Dataset.objects.get(id=ds_id)
             dataset.delete()
+        except ProtectedError as error:
+            print(f"Error: {error}")
+            error_msg = "Error: Cannot delete a dataset that is 'in use'"
+            return JsonResponse({'error_type': "ProtectedError", 'error_msg': error_msg}, status=400)
         except Dataset.DoesNotExist:
-            print("Dataset does not exist")
+            print(f"Dataset {ds_id} does not exist")
 
-    # Doesn't refresh page!!!
-    return redirect('binary_cnn:datasets')
+    # Return json.
+    data = {'msg': 'Datasets deleted!'}
+    return JsonResponse(data)
 
 
 def models(request):
@@ -117,7 +119,26 @@ def delete_models(request):
     for model_id in ids:
         try:
             binary_model = BinaryModel.objects.get(id=model_id)
+
+            # Get a reference to datasets associated with the model via TrainConfig.
+            train_config = TrainConfig.objects.get(binary_model=model_id)
+            ds_used_by_model = [train_config.training_ds, train_config.validation_ds]
+
+            # Delete model causing cascade delete to the related TrainConfig.
             binary_model.delete()
+
+            # Check if the datasets are still 'in use'.
+            for ds in ds_used_by_model:
+                # If a dataset is related to one or more TrainConfig then it's still 'in use'.
+                tcs_using_ds_for_training = TrainConfig.objects.filter(training_ds=ds.id)
+                tcs_using_ds_for_validation = TrainConfig.objects.filter(validation_ds=ds.id)
+
+                num_tcs_using_ds = len(tcs_using_ds_for_training) + len(tcs_using_ds_for_validation)
+
+                if num_tcs_using_ds == 0:
+                    ds.is_active = False
+                    ds.save()
+
         except BinaryModel.DoesNotExist:
             print("BinaryModel does not exist")
 
@@ -212,9 +233,15 @@ def train(request, model_id):
                 binary_model.status = Status.TRAINING
                 binary_model.save()
 
+                # Get the datasets references for training and validation.
+                training_dataset = train_config.training_ds
+                validation_dataset = train_config.validation_ds
+
+                # Get the dir path from the references.
+                training_dir = training_dataset.save_dir.name
+                validation_dir = validation_dataset.save_dir.name
+
                 # Train the model.
-                training_dir = train_config.training_ds.save_dir.name
-                validation_dir = train_config.validation_ds.save_dir.name
                 ml_model = ml.train_model(ml_model, training_dir, validation_dir)
 
                 # Save the ml model to the save dir of the BinaryModel.
@@ -227,6 +254,13 @@ def train(request, model_id):
                 # Associate TrainingConfig's binary_model field with the BinaryModel.
                 train_config.binary_model = binary_model
                 train_config.save()
+
+                # Update the datasets references to active.
+                training_dataset.is_active = True
+                validation_dataset.is_active = True
+                training_dataset.save()
+                validation_dataset.save()
+
                 data = {'msg': "Your model has been trained"}
                 return JsonResponse(data)
 

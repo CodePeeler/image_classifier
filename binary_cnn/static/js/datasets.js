@@ -6,8 +6,11 @@ function toggleAll(source) {
 }
 
 
-function deleteDatasets() {
-    alert("Deleting datasets!")
+// Fetch API to update page on submit of form.
+document.getElementById('myForm').addEventListener('submit', function(event) {
+
+    event.preventDefault(); // Prevent default form submission
+
     // Get all checkboxes
     var checkboxes = document.querySelectorAll('.rowCheckbox');
     // Array to store IDs of selected rows to delete
@@ -21,34 +24,35 @@ function deleteDatasets() {
         }
     });
 
-    // Make API call to delete objects from server
+    // Make API call to delete datasets from server
     if (idsToDelete.length > 0) {
-        // Assuming there's an API endpoint "/delete_objects" to delete objects
-
         var data = { ids: idsToDelete };
 
-        // Make a POST request to the API endpoint
-        const csrfToken = document.querySelector('input[name="csrfmiddlewaretoken"]').value;
+        // Get form data
+        const formData = new FormData(this);
+
+        formData.append('json', JSON.stringify(data));
+
+        // Send form data to the server
         fetch('delete/', {
             method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'X-CSRFToken': csrfToken
-            },
-            body: JSON.stringify(data)
+            body: formData
         })
-        .then(response => {
-            if (response.ok) {
+        .then(response => response.json())
+        .then(data => {
+            console.log(data)
+             if (data.error_type == "ProtectedError") {
+                document.getElementById('error_msg').textContent = data.error_msg
+                document.getElementById('error_msg').style.color = "red";
+            } else {
                 // Delete selected rows from table if API call is successful
                 idsToDelete.forEach(function(id) {
                     document.querySelector('[data-id="' + id + '"]').closest('tr').remove();
                 });
-            } else {
-                console.error('Error deleting objects:', response.statusText);
             }
         })
         .catch(error => {
-            console.error('Error deleting objects:', error);
+            console.error('Error:', error);
         });
     }
-}
+});

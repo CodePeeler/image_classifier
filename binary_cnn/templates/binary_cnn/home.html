@@ -22,7 +22,7 @@
       #title {
         position: absolute;
         padding-top: 20px;
-        width: 420px;
+        width: 600px;
         padding-left: 120px;
         font-size: 30px;
         border: 0px solid blue;
@@ -33,7 +33,7 @@
 
   <main role="main" class="container">
     <div id="nn_svg_box">
-      <img id="nn_img" src="/static/svg/neural_network5.svg" alt="SVG Image"><div id="title">Binary Image Classifier</div>
+      <img id="nn_img" src="/static/svg/neural_network5.svg" alt="SVG Image"><div id="title">ML Model Manager</div>
     </div>
     <div class="pb-2 mb-2 border-bottom">
       {% block page_header %}{% endblock page_header %}
@@ -42,7 +42,7 @@
 
 
     <div class="jumbotron">
-      <h1 class="display-4">ML Model Management</h1>
+      <h1 class="display-4">Machine Learning Model Management.</h1>
       <p class="lead">Create and Manage the lifecycle of your machine learning models. Prepare and upload your datasets. Create a model by choosing a model template and selecting your training parameters. Now put it into action by classifying new images.</p>
       <a class="btn btn-lg btn-primary" href="{% url 'binary_cnn:start' %}" role="button">Get started &raquo;</a>
     </div>
