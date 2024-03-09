@@ -104,8 +104,8 @@
             <tr>
                 <th></th>
                 <th>Name</th>
-                <th>Date</th>
                 <th>Status</th>
+                <th>Date</th>
             </tr>
         </thead>
         <tbody>
@@ -113,8 +113,8 @@
             <tr>
                 <td><input type="checkbox" class="rowCheckbox" data-id="{{binary_model.id}}"/></td>
                 <td><a class="nav-link" href="{% url 'binary_cnn:model' binary_model.id %}">{{ binary_model.name }}</a></td>
-                <td>{{ binary_model.date_added|date:'M d, Y H:i'  }}</td>
                 <td class="status">{{ binary_model.status }}</td>
+                <td>{{ binary_model.date_added|date:'M d, Y H:i'  }}</td>
             </tr>
             {% endfor %}
         </tbody>

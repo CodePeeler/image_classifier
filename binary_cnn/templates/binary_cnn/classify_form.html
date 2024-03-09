@@ -27,6 +27,25 @@
         font-size: 30px;
         border: 0px solid blue;
       }
+      #upload-container {
+        border: 0px solid blue;
+      }
+      #upload-img {
+        margin-right: 5px;
+        border: 0px solid green;
+        float: left;
+        }
+      #upload-btn {
+        border: 0px solid red;
+        float: left;
+        }
+        .clearFix:after {
+        content: ".";
+        display: block;
+        height: 0;
+        clear: both;
+        visibility: hidden;
+    }
     </style>
 </head>
 <body>
@@ -39,21 +58,27 @@
     {% block page_header %}{% endblock page_header %}
   </div>
 
-  <br>
+  <br><br>
   <form  method="post" enctype="multipart/form-data">
-    <h4>Step 1: Select a Model</h4>
-    {% for trained_model in trained_models %}
-      <div>
-        <input type="radio" id="trained_model" name="model_id" value="{{trained_model.id}}">
-        <label for="trained_model">{{ trained_model.name }}</label>
+    <div id="mb-3">
+
+        <div id="upload-container" class="clearFix">
+          <label id="upload-img" for="category" class="form-label"><b>Upload an Image:</b></label>
+          <div id="upload-btn">
+            {% csrf_token %}
+            {{ form.as_p }}
+          </div>
+        </div>
+
+        <label for="category" class="form-label"><b>Select a Model:</b></label>
+        <select class="form-select" id="category" name="model_id">
+        {% for trained_model in trained_models %}
+             <option value="{{trained_model.id}}">{{ trained_model }}</option>
+        {% endfor %}
+        </select>
+        <br>
+        <button class="btn-sm btn-primary" type="submit">Classify</button>
       </div>
-    {% endfor %}
-    <br>
-    <br>
-    <h4>Step 2: Upload an Image</h4>
-    {% csrf_token %}
-    {{ form.as_p }}
-    <button type="submit">Classify</button>
   </form>
   </main>
 </body>

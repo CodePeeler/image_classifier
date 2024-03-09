@@ -302,29 +302,33 @@ def classify_result(request, image_id):
     if image.is_classified:
         context = {'classification': image.img_classification}
     else:
+        # Get the path reference to the binary model.
+        bm_path = os.path.join(binary_model.save_dir, binary_model.name)
+
+        # Load the tensorflow Binary Model.
+        my_model = keras.models.load_model(bm_path)
+
+        # Get a path reference to the upload image.
         img_path = image.img_file.path
 
         # Normalize the image
         formatted_img = ml.format_img(img_path)
 
-        # Load a ml model.
-        bm_path = os.path.join(binary_model.save_dir, binary_model.name)
-
-        # Get binary model's training config.
+        # Get the binary model's training config.
         train_config = TrainConfig.objects.get(binary_model=binary_model.id)
 
-        # Get the datasets classes - used for classification of images.
+        # Get labels used for classification from the training config.
         classes = train_config.training_ds.class_labels.split(',')
 
-        #CLASS_DESC = ['horse', 'human']
-        my_model = keras.models.load_model(bm_path)
-        classification = ml.classify(my_model, formatted_img, classes)
+        # Get the classification.
+        classification_result = ml.classify(my_model, formatted_img, classes)
 
-        image.img_classification = classification
+        # Add the image classification result to the image instances.
+        image.img_classification = classification_result
         image.classified = True
         image.save()
 
         img_file_name = img_path.split('/')[-1]
-        context = {'classification': classification, 'img_file_name': img_file_name}
+        context = {'classification': classification_result, 'img_file_name': img_file_name}
 
     return render(request, 'binary_cnn/classify_result.html', context)
