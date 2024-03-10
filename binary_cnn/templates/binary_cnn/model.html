@@ -109,6 +109,19 @@
         font-size: 75%;
         border: 0px solid black;
       }
+      #divDatasets {
+        margin-top: 20px;
+        font-size: 20px;
+        background: #ebf2f6;
+        border: 0px solid green;
+        padding: 10px;
+        border: 1px solid #a9a9a9;
+      }
+      #divDatasetsContent {
+        padding: 5px;
+        font-size: 75%;
+        border: 0px solid black;
+      }
       .clearFix:after {
         content: ".";
         display: block;
@@ -116,9 +129,12 @@
         clear: both;
         visibility: hidden;
       }
+      .li-class {
+        margin-bottom: 10px;
+      }
 </style>
     {% load static %}
-    <script src="{% static 'js/model.js' %}" defer></script>
+
 </head>
 <body>
   <main role="main" class="container">
@@ -144,9 +160,8 @@
             <div id="divDetails">Details
                 <div id="divDetailsContent">
                     <ul>
-                        <li><b>Name:</b> {{binary_model.name}} - <i>(status: {{binary_model.status}})</i></li>
-                        <li><b>Description:</b> {{binary_model.description}}</li>
-                        <li><b>Dataset: </b></li>
+                        <li class="li-class"><b>Name:</b> {{binary_model.name}} - <i>(status: {{binary_model.status}})</i></li>
+                        <li class="li-class"><b>Description:</b> {{binary_model.description}}</li>
                     </ul>
                 </div>
             </div>
@@ -154,8 +169,8 @@
                 <div id="divPerformanceContent">
                     <ul>
                         <!-- NB May not be actual accuracy - it was the accuracy specified for training -->
-                        <li><b>Accuracy:</b> {{train_config.accuracy}}</li>
-                        <li><b>Training time:</b></li>
+                        <li class="li-class"><b>Accuracy:</b> {{train_config.accuracy}}</li>
+                        <li class="li-class"><b>Training time:</b></li>
                     </ul>
                 </div>
             </div>
@@ -164,8 +179,19 @@
             <div id="divParameters">Parameters
                 <div id="divParametersContent">
                     <ul>
-                        <li><b>Classification labels:</b> [{{train_config.classification_classes}}]</li>
-                        <li><b>Learning rate:</b> {{train_config.learning_rate}}</li>
+                        <li class="li-class"><b>Learning rate:</b> {{train_config.learning_rate}}</li>
+                    </ul>
+                </div>
+            </div>
+            <div id="divDatasets">Datasets
+                <div id="divDatasetsContent">
+                    <ul>
+
+                        <li class="li-class"><b>Training DS Name:</b> {{train_config.training_ds}}<br>
+                        <b>labels:</b><i> [{{train_config.training_ds.class_labels}}]</i></li>
+
+                        <li class="li-class"><b>Validation DS Name:</b> {{train_config.validation_ds}}<br>
+                        <b>labels:</b><i> [{{train_config.validation_ds.class_labels}}]</i></li>
                     </ul>
                 </div>
             </div>

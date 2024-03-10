@@ -129,15 +129,8 @@ def delete_models(request):
 
             # Check if the datasets are still 'in use'.
             for ds in ds_used_by_model:
-                # If a dataset is related to one or more TrainConfig then it's still 'in use'.
-                tcs_using_ds_for_training = TrainConfig.objects.filter(training_ds=ds.id)
-                tcs_using_ds_for_validation = TrainConfig.objects.filter(validation_ds=ds.id)
-
-                num_tcs_using_ds = len(tcs_using_ds_for_training) + len(tcs_using_ds_for_validation)
-
-                if num_tcs_using_ds == 0:
-                    ds.is_active = False
-                    ds.save()
+                ds.is_active = is_dataset_in_use(ds)
+                ds.save()
 
         except BinaryModel.DoesNotExist:
             print("BinaryModel does not exist")
@@ -145,6 +138,19 @@ def delete_models(request):
     # Return json.
     data = {'msg': 'Models deleted!'}
     return JsonResponse(data)
+
+
+def is_dataset_in_use(dataset):
+    # If a dataset is related to one or more TrainConfig then it's still 'in use'.
+    tcs_using_ds_for_training = TrainConfig.objects.filter(training_ds=dataset.id)
+    tcs_using_ds_for_validation = TrainConfig.objects.filter(validation_ds=dataset.id)
+
+    num_tcs_using_ds = len(tcs_using_ds_for_training) + len(tcs_using_ds_for_validation)
+
+    if num_tcs_using_ds == 0:
+        return False
+    else:
+        return True
 
 
 # TODO Do you really need this method - could just use the above!
@@ -215,9 +221,20 @@ def train(request, model_id):
                 # If retraining then delete old TrainConfig (BM to TC is 1 to 1)
                 if binary_model.status == Status.TRAINED:
                     old_train_config = TrainConfig.objects.get(binary_model=model_id)
+
+                    # Get a reference to datasets associated with the old TrainConfig.
+                    ds_used_by_tc = [old_train_config.training_ds, old_train_config.validation_ds]
+
+                    # Delete the old config and update the model status.
                     old_train_config.delete()
                     binary_model.status = Status.UNTRAINED
                     binary_model.save()
+
+                    # NB, We've deleted tc above before checking if ds is still 'in use'.
+                    # This is important as we look up tc to see if they have ref to any ds.
+                    for ds in ds_used_by_tc:
+                        ds.is_active = is_dataset_in_use(ds)
+                        ds.save()
 
                 # Create a new TrainingConfig instance.
                 train_config = train_form.save(commit=False)

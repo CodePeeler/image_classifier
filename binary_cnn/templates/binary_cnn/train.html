@@ -4,21 +4,21 @@
     <meta charset="UTF-8">
     <title>Train</title>
     <style>
-         #nn_img {
+     #nn_img {
         position: absolute;
         width: 120px;
         height: 80px;
         padding-left: 0px;
         padding-bottom: 0px;
         border: 0px solid red;
-      }
-       #nn_svg_box {
+     }
+     #nn_svg_box {
         width: 420px;
         height: 90px;
         padding-left: 0px;
         border: 0px solid green;
-    }
-        #title {
+     }
+     #title {
         position: absolute;
         padding-top: 20px;
         width: 300px;
@@ -26,19 +26,18 @@
         font-size: 30px;
         border: 0px solid blue;
     }
-        #text_box{
-          visibility: hidden;
-          font-family: "Lucida Console", "Courier New";
-          position: absolute;
-          padding: 20px;
-          padding-top: 10px;
-          border: 0px solid green;
-        }
-        #loader_box {
-          width: 300px;
-          position: relative;
-          border: 0px solid blue;
-        }
+    #text_box{
+        font-family: "Lucida Console", "Courier New";
+        position: absolute;
+        padding: 0px;
+        padding-top: 10px;
+        border: 0px solid green;
+    }
+    #loader_box {
+        width: 300px;
+        position: relative;
+        border: 0px solid blue;
+    }
         .loader {
           visibility: hidden;
           opacity: 1;
@@ -56,9 +55,29 @@
           0% { transform: rotate(0deg); }
           100% { transform: rotate(360deg); }
         }
-        #back_to_models_button {
-          visibility: hidden;
-        }
+
+        .clearFix:after {
+        content: ".";
+        display: block;
+        height: 0;
+        clear: both;
+        visibility: hidden;
+      }
+      #form-container {
+        border: 0px solid pink;
+        padding-bottom: 10px;
+
+      }
+      #train_form {
+        float: left;
+      }
+      #submit {
+        float: left;
+      }
+      #bck-to-models-btn {
+      visibility: hidden;
+        float: left;
+      }
     </style>
     {% load static %}
     <script src="{% static 'js/train.js' %}" defer></script>
@@ -77,26 +96,21 @@
        <div>Model: <b>{{binary_model.name}}</b></div>
        <br>
 
-    <!-- form id="train_form" action = "{% url 'binary_cnn:train' binary_model.id %}" method='post' -->
-  <form id="train_form" action="/submit" method='post'>
-    {% csrf_token %}
-    {{ train_form.as_p }}
-    <input type="hidden" id="model_id" name="model_id" value="{{binary_model.id}}">
-    <button type="submit" id="submit" class="btn btn-sm btn-primary" name="submit">Train</button>
-  </form>
-  <br>
+   <div id="form-container" class="clearFix">
 
-  <div id="text_box"><b>Training...</b></div>
+      <form id="train_form" action="/submit" method='post'>
+        {% csrf_token %}
+        {{ train_form.as_p }}
+        <input type="hidden" id="model_id" name="model_id" value="{{binary_model.id}}">
+        <button type="submit" id="submit" class="btn btn-sm btn-primary" name="submit">Train</button>
+      </form>
+   </div>
+
+  <div id="text_box"></div>
+
   <div id="loader_box">
     <div class="loader"></div>
   </div>
-
-  <form action = "{% url 'binary_cnn:models' %}" method="post" >
-    {% csrf_token %}
-    <button id="back_to_models_button">Back to Models</button>
-  </form>
-  <br>
-  <div id="message"></div>
    </main>
 </body>
 {% endblock content %}
