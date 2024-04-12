@@ -26,12 +26,12 @@
               .
               .
               .
-            dog.999.jpg
+              dog.999.jpg
 
 * Model Management features to manage lifecycle.
 
       * Quickly create ML model using template
-      * Save and retrain models              
+      * Save/delete and retrain models              
 
 
 * Training parameters for tweaking learning algorithm. 
@@ -48,6 +48,7 @@
           Precision
           Recall
           F1 Score
+          Training time
   
 * User management
 
