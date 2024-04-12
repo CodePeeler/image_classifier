@@ -1,6 +1,5 @@
 // Fetch API to update page on submit of form.
 document.getElementById('create_form').addEventListener('submit', function(event) {
-
     event.preventDefault(); // Prevent default form submission
 
     // Get form data
@@ -15,7 +14,6 @@ document.getElementById('create_form').addEventListener('submit', function(event
     .then(data => {
         // Get a reference to the element you want to remove
         var elementCreateForm = document.getElementById('create_form');
-
 
         // Get a reference to the parent node of the element
         var parentElement = elementCreateForm.parentNode;

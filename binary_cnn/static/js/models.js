@@ -26,7 +26,6 @@ function refreshPage() {
     window.location.reload();
 }
 
-
 // Check if any model's status is in 'training' and if so keep refreshing
 // page until the status changes.
 function checkTextValueOnLoad() {
@@ -40,7 +39,6 @@ function checkTextValueOnLoad() {
 
 checkTextValueOnLoad();
 
-
 function toggleAll(source) {
     var checkboxes = document.querySelectorAll('input[type="checkbox"]');
     for (var i = 0; i < checkboxes.length; i++) {
@@ -48,10 +46,8 @@ function toggleAll(source) {
     }
 }
 
-
 // Fetch API to update page on submit of form.
 document.getElementById('myForm').addEventListener('submit', function(event) {
-
     event.preventDefault(); // Prevent default form submission
 
     // Get all checkboxes
@@ -83,7 +79,6 @@ document.getElementById('myForm').addEventListener('submit', function(event) {
         })
         .then(response => response.json())
         .then(data => {
-            console.log(data)
             // Delete selected rows from table if API call is successful
             idsToDelete.forEach(function(id) {
                 document.querySelector('[data-id="' + id + '"]').closest('tr').remove();

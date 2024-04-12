@@ -1,15 +1,17 @@
 import os
 import json
+import pickle
 import zipfile
 
 import keras
 from django.db.models import ProtectedError
 from django.http import JsonResponse
 from django.shortcuts import render, redirect
+from django.views.decorators.csrf import csrf_exempt
 
 import binary_cnn.ml_cnn as ml
 from binary_cnn.forms import DatasetForm, BinaryModelForm, TrainConfigForm, ImageForm
-from binary_cnn.models import DSType, DSCategory, Dataset, Status, BinaryModel, Image, TrainConfig
+from binary_cnn.models import DSType, DSCategory, Dataset, Status, BinaryModel, Image, TrainConfig, TrainingKpi
 import binary_cnn.utilities as util
 
 
@@ -91,7 +93,6 @@ def delete_datasets(request):
 def models(request):
     # Get all the trained models.
     binary_models = BinaryModel.objects.order_by('-date_added')
-
     context = {'binary_models': binary_models}
     return render(request, 'binary_cnn/models.html', context)
 
@@ -101,9 +102,11 @@ def model(request, model_id):
         # Get the requested model
         binary_model = BinaryModel.objects.get(id=model_id)
         train_config = None
+        training_kpis = None
         if binary_model.status == Status.TRAINED:
             train_config = TrainConfig.objects.get(binary_model=binary_model)
-        context = {'binary_model': binary_model, 'train_config': train_config}
+            training_kpis = TrainingKpi.objects.get(config=train_config)
+        context = {'binary_model': binary_model, 'train_config': train_config, 'training_kpis': training_kpis}
         return render(request, 'binary_cnn/model.html', context)
     except BinaryModel.DoesNotExist:
         # Handle the case where the object does not exist
@@ -120,17 +123,23 @@ def delete_models(request):
         try:
             binary_model = BinaryModel.objects.get(id=model_id)
 
-            # Get a reference to datasets associated with the model via TrainConfig.
-            train_config = TrainConfig.objects.get(binary_model=model_id)
-            ds_used_by_model = [train_config.training_ds, train_config.validation_ds]
+            # If the model is trained then check if its ds is 'in-use' after delete.
+            if binary_model.status == Status.TRAINED:
 
-            # Delete model causing cascade delete to the related TrainConfig.
-            binary_model.delete()
+                # Get a reference to datasets associated with the model via TrainConfig.
+                train_config = TrainConfig.objects.get(binary_model=model_id)
+                ds_used_by_model = [train_config.training_ds, train_config.validation_ds]
 
-            # Check if the datasets are still 'in use'.
-            for ds in ds_used_by_model:
-                ds.is_active = is_dataset_in_use(ds)
-                ds.save()
+                # Delete model causing cascade delete to the related TrainConfig.
+                # NB. A dataset is 'in use' iff it is associated with at least one TrainConfig.
+                binary_model.delete()
+
+                # Check if the datasets are still 'in use'.
+                for ds in ds_used_by_model:
+                    ds.is_active = is_dataset_in_use(ds)
+                    ds.save()
+            else:
+                binary_model.delete()
 
         except BinaryModel.DoesNotExist:
             print("BinaryModel does not exist")
@@ -153,18 +162,6 @@ def is_dataset_in_use(dataset):
         return True
 
 
-# TODO Do you really need this method - could just use the above!
-def delete_model(request, model_id):
-    # Delete a single BinaryModel instances.
-    try:
-        binary_model = BinaryModel.objects.get(id=model_id)
-        binary_model.delete()
-    except BinaryModel.DoesNotExist:
-        # Handle the case where the object does not exist
-        print("Object does not exist")
-    return redirect('binary_cnn:models')
-
-
 def create(request):
     if request.method != 'POST':
         create_form = BinaryModelForm()
@@ -185,24 +182,26 @@ def create(request):
             path = os.path.join(new_bm.save_dir, new_bm.name)
             ml_model.save(path)
 
-            # Create static and absolute paths for the model's summary text file.
-            model_summary_name = new_bm.name + '_summary.txt'
-            model_summary_static_path = os.path.join('/static/text/', model_summary_name)
-            model_summary_abs_path = os.getcwd() + '/binary_cnn' + model_summary_static_path
+            # Create a dir for the models static content.
+            static_dir_path = os.path.join('static', new_bm.name)
+            static_dir_rel_path = os.path.join('binary_cnn', static_dir_path)
+            os.mkdir(static_dir_rel_path)
 
-            # Redirect print output to the file.
-            with open(model_summary_abs_path, 'w') as f:
+            # Redirect tf model's summary print output to the file.
+            fname = 'model_summary.txt'
+            with open(os.path.join(static_dir_rel_path, fname), 'w') as f:
                 ml_model.summary(print_fn=lambda x: f.write(x + '\n'))
 
-            # Add the absolute path to the BinaryModel instances - required for clean-up!
-            new_bm.path_model_summary = model_summary_abs_path
+            # Add the absolute path to the BinaryModel static content - required for clean-up!
+            new_bm.static_dir_path = os.getcwd() + '/' + static_dir_rel_path
 
             # Commit changes to the db.
             new_bm.save()
 
             # Return json.
+            summary_txt_path = os.path.join('/', static_dir_path, fname)
             msg = f'Success: {new_bm.name} created!'
-            data = {'model_id': new_bm.id, 'model_summary_txt': model_summary_static_path, 'msg': msg}
+            data = {'model_id': new_bm.id, 'model_summary_txt': summary_txt_path, 'msg': msg}
             return JsonResponse(data)
 
 
@@ -231,10 +230,16 @@ def train(request, model_id):
                     binary_model.save()
 
                     # NB, We've deleted tc above before checking if ds is still 'in use'.
-                    # This is important as we look up tc to see if they have ref to any ds.
+                    # This is intentional as we look up tcs to see if they have ref to any ds.
                     for ds in ds_used_by_tc:
                         ds.is_active = is_dataset_in_use(ds)
                         ds.save()
+
+                    # Also for retraining we must remove previous history.pkl.
+                    path_history_file = os.path.join(binary_model.static_dir_path, 'history.pkl')
+
+                    if os.path.exists(path_history_file):
+                        os.remove(path_history_file)
 
                 # Create a new TrainingConfig instance.
                 train_config = train_form.save(commit=False)
@@ -259,18 +264,49 @@ def train(request, model_id):
                 validation_dir = validation_dataset.save_dir.name
 
                 # Train the model.
-                ml_model = ml.train_model(ml_model, training_dir, validation_dir)
+                train_history, train_time = ml.train_model(
+                    ml_model,
+                    training_dir,
+                    validation_dir,
+                    min_accuracy=train_config.minimum_accuracy,
+                    epochs=train_config.num_of_epochs)
 
-                # Save the ml model to the save dir of the BinaryModel.
+                # Save the model's training history.
+                with open(binary_model.static_dir_path + '/history.pkl', 'wb') as file:
+                    pickle.dump(train_history, file)
+
+                # Create plots and save them to the model's static dir.
+                ml.save_training_plots(train_history, binary_model.static_dir_path)
+
+                # Save the actual ml model to the save dir of the BinaryModel instances.
                 ml_model.save(saved_model_path)
 
                 # Update the model's status
                 binary_model.status = Status.TRAINED
                 binary_model.save()
 
-                # Associate TrainingConfig's binary_model field with the BinaryModel.
+                # Add a reference to the BinaryModel instances for the TrainingConfig.
+                train_config.name = 'Config_'+binary_model.name
                 train_config.binary_model = binary_model
                 train_config.save()
+
+                # Create a new TrainingKpi instances for the trained model.
+                training_kpis = TrainingKpi(name='KPIs_'+binary_model.name, config=train_config)
+
+                # Record the actual accuracy achieved during training.
+                training_kpis.actual_accuracy = train_history.history['accuracy'][-1]
+                training_kpis.actual_val_accuracy = train_history.history['val_accuracy'][-1]
+                training_kpis.actual_epochs = len(train_history.epoch)
+
+                # Record Key Performance Indicators
+                kpis = ml.calculate_kpis(ml_model, validation_dir)
+                training_kpis.precision = kpis['precision']
+                training_kpis.recall = kpis['recall']
+                training_kpis.f1_score = kpis['f1_score']
+                training_kpis.set_training_time_dhms(train_time)
+
+                # Save the kpis.
+                training_kpis.save()
 
                 # Update the datasets references to active.
                 training_dataset.is_active = True

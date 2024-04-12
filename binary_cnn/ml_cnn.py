@@ -1,20 +1,22 @@
+import base64
 import os
 import time
 import zipfile
+from io import BytesIO
 from typing import List
 
 import keras
 import matplotlib.image as mpimg
 import matplotlib.pyplot as plt
 import numpy as np
+from sklearn.metrics import precision_score, recall_score
 import wget
 from keras.preprocessing.image import ImageDataGenerator
 
 #  Training Parameters
-NUM_EPOCHS = 15
+DEFAULT_NUM_EPOCHS = 15
 NUM_BATCHES = 8
 LEARNING_RATE = 0.001
-CALLBACK_MIN_ACCURACY = 0.59
 callback_is_train_end = False
 
 #  Image Metadata
@@ -114,10 +116,14 @@ def compile_model(the_model, learning_rate=LEARNING_RATE):
 
 
 class MyCallback(keras.callbacks.Callback):
+    def __init__(self, min_accuracy=1.0):
+        super().__init__()
+        self.min_accuracy = min_accuracy
+
     def on_epoch_end(self, epoch, logs=None):
-        if logs.get('accuracy') > CALLBACK_MIN_ACCURACY:
+        if logs.get('accuracy') > self.min_accuracy:
             print(f"\nTraining halted: Model exceeded minimum accuracy threshold of"
-                  f" {CALLBACK_MIN_ACCURACY*100}%")
+                  f" {self.min_accuracy*100}%")
             self.model.stop_training = True
 
     def on_train_end(self, logs=None):
@@ -138,32 +144,110 @@ def check_status():
 # ImageDataGenerator, streams images from source img_dir in batches of
 # batch_size generating labels on the fly; e.g. 0=horse and 1=human.
 def data_gen_helper(img_dir, batch_size):
-    return ImageDataGenerator(rescale=1 / 255).flow_from_directory(
-        img_dir,
-        target_size=TARGET_SIZE,  # All images will be resized to 300x300.
-        batch_size=batch_size,
-        class_mode='binary'  # Used binary_crossentropy loss in 'compile' => 'binary' labels.
-    )
+    return (ImageDataGenerator(rescale=1 / 255,
+                               rotation_range=40,
+                               width_shift_range=0.2,
+                               height_shift_range=0.2,
+                               shear_range=0.2,
+                               zoom_range=0.2,
+                               horizontal_flip=True,
+                               fill_mode='nearest')
+            .flow_from_directory(
+                            img_dir,
+                            target_size=TARGET_SIZE,  # All images will be resized to 300x300.
+                            batch_size=batch_size,
+                            class_mode='binary'  # Used binary_crossentropy loss in 'compile' => 'binary' labels.
+    ))
 
 
-def train_model(the_model, training_dir, validation_dir):
+def train_model(the_model, training_dir, validation_dir, min_accuracy=1, epochs=DEFAULT_NUM_EPOCHS):
     global callback_is_train_end
     callback_is_train_end = False
     print(f">>>>>>>>> Training started! \ncallback_is_train_end = {callback_is_train_end}")
 
     training_data_gen = data_gen_helper(training_dir, 128)
-    validation_data_gen = data_gen_helper(validation_dir, 32)
+    validation_data_gen = ImageDataGenerator(rescale=1 / 255,).flow_from_directory(validation_dir,
+                                                                                   target_size=TARGET_SIZE,
+                                                                                   batch_size=32,
+                                                                                   class_mode='binary')
+    start_time = time.time()
 
-    the_model.fit(
+    the_history = the_model.fit(
         training_data_gen,
         steps_per_epoch=NUM_BATCHES,  # Specifies how many batches will determine one epoch.
-        epochs=NUM_EPOCHS,
+        epochs=epochs,
         verbose=1,
-        callbacks=MyCallback(),
+        callbacks=MyCallback(min_accuracy),
         validation_data=validation_data_gen,
         validation_steps=NUM_BATCHES
     )
-    return the_model
+
+    end_time = time.time()
+    training_time = end_time - start_time
+
+    return the_history, training_time
+
+
+def calculate_kpis(the_model, validation_dir):
+    num_batches = 32
+    validation_data_gen = data_gen_helper(validation_dir, num_batches)
+
+    # Get true labels and predicted probabilities for the validation set
+    y_true = []  # List to store true labels
+    y_pred_prob = []  # List to store predicted probabilities
+
+    for _ in range(num_batches):  # num_batches is the number of batches in your validation set
+        x_val_batch, y_val_batch = next(validation_data_gen)  # Get next batch of validation data
+        y_true.extend(y_val_batch)  # Append true labels to y_true
+
+        # Predict probabilities for the current batch
+        batch_pred_prob = the_model.predict(x_val_batch)
+        y_pred_prob.extend(batch_pred_prob)  # Append predicted probabilities to y_pred_prob
+
+    y_pred = (np.array(y_pred_prob) > 0.5).astype(int)
+
+    # Calculate precision, recall and f1_score.
+    precision = precision_score(y_true, y_pred, zero_division='warn')
+    recall = recall_score(y_true, y_pred, zero_division='warn')
+    f1_score = 2 * (precision * recall) / (precision + recall)
+
+    return {'precision': precision, 'recall': recall, 'f1_score': f1_score}
+
+
+def save_training_plots(history, path):
+    plt.switch_backend('Agg')
+
+    train_accuracy = history.history['accuracy']
+    val_accuracy = history.history['val_accuracy']
+
+    epochs = range(1, len(train_accuracy)+1)
+    plt.xticks(epochs)
+
+    plt.title('Accuracy')
+    plt.plot(epochs, train_accuracy, color='blue', label='Training')
+    plt.plot(epochs, val_accuracy, color='orange', label='Validation')
+
+    plt.legend()
+    plt.xlabel('epochs')
+
+    # Save the plot as a JPG file
+    plt.savefig(path+'/accuracy.jpg', format='jpg')
+
+    # Reset matplotlib
+    plt.clf()
+
+    train_loss = history.history['loss']
+    val_loss = history.history['val_loss']
+
+    plt.xticks(epochs)
+
+    plt.title('Loss')
+    plt.plot(epochs, train_loss, color='blue', label='Training')
+    plt.plot(epochs, val_loss, color='orange', label='Validation')
+
+    plt.legend()
+    plt.xlabel('epochs')
+    plt.savefig(path + '/loss.jpg', format='jpg')
 
 
 # Load, resize and normalise an image for classification.

@@ -4,7 +4,31 @@
 <head>
     <meta charset="UTF-8">
     <title>Model</title>
-    <style>
+    <style>   /*
+     body {
+        border: 0px solid green;
+        margin: 0px;
+        padding: 0px;
+     }
+     .container {
+        border: 1px solid blue;
+        margin: 0px;
+        padding-left: 0px;
+        padding-right: 0px;
+        margin-left: 10%;
+        margin-right: 0%;
+     }
+     main {
+        border: 2px solid yellow;
+        padding: 0px;
+        margin: 0px;
+        width: 100%;
+         width: 1380px;
+         position: relative;
+     }
+*/
+
+     }
      #nn_img {
         position: absolute;
         width: 120px;
@@ -30,98 +54,152 @@
 
       /****** Content *********/
 
-      #wrapper{
-        position: relative;
-        border: 1px solid #a9a9a9;
-        width: 80%;
-        margin: 10%;
-        margin-top: 10px;
-
-        width: 840px;
-        padding: 20px;
-      }
       #modelButtonContainer {
         margin: 10px;
+        margin-left: 0px;
+        margin-bottom: 0px;
         width: 120px;
         border: 0px solid blue;
       }
-      #trainModelButton {
 
+      #trainModelButton {
         float: right;
       }
-      #deleteModelButton {
 
+      #deleteModelButton {
         float: left;
       }
+
       #columnOne {
-        margin-top: 0px;
+        margin-top: 1px;
         margin-bottom: 0px;
-        padding: 10px;
+        padding-right: 10px;
+        margin-left: 0px;
         float: left;
-        width: 400px;
+        width: 300px;
 
         border: 0px solid red;
       }
+
       #columnTwo {
-        margin-top: 0px;
+        margin-top: 1px;
         margin-bottom: 0px;
         margin-left: 0px;
-        padding: 10px;
+
         float: left;
-        width: 400px;
+        width: 450px;
+        border: 0px solid green;
+      }
+
+      #columnThree {
+        margin-top: 1px;
+        padding-left: 10px;
+        float: left;
+        width: 300px;
 
         border: 0px solid red;
       }
-      #divDetails {
-        font-size: 20px;
-        background: #ebf2f6;
-        border: 0px solid green;
-        padding: 10px;
-        border: 1px solid #a9a9a9;
+
+      .headings {
+        padding-top: 5px;
+        padding-bottom: 5px;
+        font-size: 120%;
       }
+
+      #divDetails {
+        padding-bottom: 0px;
+        border: solid yellow 0px;
+      }
+
       #divDetailsContent {
+        margin-top: 5px;
         padding: 5px;
         font-size: 75%;
-        border: 0px solid black;
+        background: #ebf2f6;
+        border: 1px solid #a9a9a9;
       }
+
       #divPerformance {
         margin-top: 20px;
         font-size: 20px;
-        background: #ebf2f6;
         border: 0px solid green;
         padding: 10px;
-        border: 1px solid #a9a9a9;
+        padding-left: 0px;
       }
+
       #divPerformanceContent {
         padding: 5px;
         font-size: 75%;
-        border: 0px solid black;
-      }
-      #divParameters {
-        font-size: 20px;
         background: #ebf2f6;
-        border: 0px solid green;
-        padding: 10px;
         border: 1px solid #a9a9a9;
       }
+
+      #divParameters {
+        font-size: 20px;
+        border: 0px solid green;
+        padding: 10px;
+        margin-top: 20px;
+        padding-left: 0px;
+       }
+
       #divParametersContent {
         padding: 5px;
         font-size: 75%;
-        border: 0px solid black;
+        background: #ebf2f6;
+        border: 1px solid #a9a9a9;
       }
+
       #divDatasets {
         margin-top: 20px;
         font-size: 20px;
-        background: #ebf2f6;
-        border: 0px solid green;
         padding: 10px;
-        border: 1px solid #a9a9a9;
       }
+
       #divDatasetsContent {
         padding: 5px;
         font-size: 75%;
+        background: #ebf2f6;
+        border: 1px solid #a9a9a9;
+      }
+
+      #divModelArch {
+      }
+
+      #divGraphs {
+        visibility: hidden;
+        border: 0px solid pink;
+      }
+
+      #divGraphsContent {
+        border: 0px solid green;
+        margin-top: 0px;
+      }
+
+      .plots {
+        border: 1px solid #a9a9a9;
+        width: 490px;
+        margin-left: 0px;
+        margin-bottom: 35px;
+        margin-top: -24px;
+      }
+
+      #divModelArch {
         border: 0px solid black;
       }
+
+      #ModelArchTitle {
+        margin-top: 10px;
+        margin-bottom: -10px;
+        border: 0px solid yellow;
+      }
+
+      #divModelArchContent {
+        padding: 5px;
+        background: #ebf2f6;
+        border: 1px solid #a9a9a9;
+        font-size: 80%;
+      }
+
       .clearFix:after {
         content: ".";
         display: block;
@@ -130,14 +208,15 @@
         visibility: hidden;
       }
       .li-class {
-        margin-bottom: 10px;
+        margin-bottom: 5px;
       }
 </style>
     {% load static %}
+    <script src="{% static 'js/model.js' %}" defer></script>
 
 </head>
 <body>
-  <main role="main" class="container">
+  <main role="main" class="container, clearFix">
 
     <div id="nn_svg_box">
       <img id="nn_img" src="/static/svg/neural_network5.svg" alt="SVG Image"><div id="title">Model</div>
@@ -148,19 +227,21 @@
 
     <br>
     <div id="modelButtonContainer" class="clearFix">
-        <form action = "{% url 'binary_cnn:delete_model' binary_model.id %}" method="post">
+        <form id="modelForm"  action="/submit"  method='post'>
             {% csrf_token %}
-            <button id="deleteModelButton" class="btn btn-sm btn-secondary">Delete</button>
+            <input type="hidden" id="model_id" name="model_id" value="{{binary_model.id}}">
+            <button id="deleteModelButton" class="btn btn-sm btn-secondary" type="submit">Delete</button>
         </form>
         <a href="{% url 'binary_cnn:train' binary_model.id%}"><button id="trainModelButton" class="btn btn-sm btn-primary">Train</button></a>
     </div>
 
     <div id="colContainer">
         <div id="columnOne">
-            <div id="divDetails">Details
+            <div id="divDetails" class="headings">Details
                 <div id="divDetailsContent">
                     <ul>
-                        <li class="li-class"><b>Name:</b> {{binary_model.name}} - <i>(status: {{binary_model.status}})</i></li>
+                        <li class="li-class"><b>Name:</b> {{binary_model.name}}</li>
+                        <li class="li-class"><b>Status:</b> {{binary_model.status}}</li>
                         <li class="li-class"><b>Description:</b> {{binary_model.description}}</li>
                     </ul>
                 </div>
@@ -168,17 +249,24 @@
             <div id="divPerformance">Performance
                 <div id="divPerformanceContent">
                     <ul>
-                        <!-- NB May not be actual accuracy - it was the accuracy specified for training -->
-                        <li class="li-class"><b>Accuracy:</b> {{train_config.accuracy}}</li>
-                        <li class="li-class"><b>Training time:</b></li>
+                        <li class="li-class"><b>Accuracy:</b><br>
+                            <i>(training data)</i>:{{training_kpis.actual_accuracy}}
+                            <i>(validation data)</i>:{{training_kpis.actual_val_accuracy}}
+                        </li>
+
+                        <li class="li-class"><b>Number of Epochs: </b>{{training_kpis.actual_epochs}}</li>
+                        <li class="li-class"><b>Training time: </b>{{training_kpis.training_time_dhms}}</li>
+                        <li class="li-class"><b>Precision: </b>{{training_kpis.precision}}</li>
+                        <li class="li-class"><b>Recall: </b>{{training_kpis.recall}}</li>
+                        <li class="li-class"><b>F1 Score: </b>{{training_kpis.f1_score}}</li>
                     </ul>
                 </div>
             </div>
-        </div>
-        <div id="columnTwo">
             <div id="divParameters">Parameters
                 <div id="divParametersContent">
                     <ul>
+                        <li class="li-class"><b>Min accuracy: </b> {{train_config.minimum_accuracy}}</li>
+                        <li class="li-class"><b>Max number of epochs: </b> {{train_config.num_of_epochs}}</li>
                         <li class="li-class"><b>Learning rate:</b> {{train_config.learning_rate}}</li>
                     </ul>
                 </div>
@@ -186,19 +274,51 @@
             <div id="divDatasets">Datasets
                 <div id="divDatasetsContent">
                     <ul>
-
-                        <li class="li-class"><b>Training DS Name:</b> {{train_config.training_ds}}<br>
+                        <li class="li-class"><b>Training: </b> {{train_config.training_ds}}<br>
                         <b>labels:</b><i> [{{train_config.training_ds.class_labels}}]</i></li>
 
-                        <li class="li-class"><b>Validation DS Name:</b> {{train_config.validation_ds}}<br>
+                        <li class="li-class"><b>Validation: </b> {{train_config.validation_ds}}<br>
                         <b>labels:</b><i> [{{train_config.validation_ds.class_labels}}]</i></li>
                     </ul>
                 </div>
             </div>
         </div>
+        <div id="columnTwo">
+            <div id="divModelArch" class="headings">Model Architecture</div>
+            <div id="divModelArchContent">
+                <pre id="fileContent"></pre>
+            </div>
+        </div>
+        <div id="columnThree">
+            <div id="divGraphs">
+                <div id="divGraphsTitle" class="headings">Training Graphs</div>
+                <div id="divGraphsContent"><br>
+                    <img id="acc-plot" class="plots" src="/static/{{binary_model.name}}/accuracy.jpg" alt="">
+                    <img id="loss-plot" class="plots" src="/static/{{binary_model.name}}/loss.jpg" alt="">
+                </div>
+            </div>
+        </div>
     </div><!-- end colContainer -->
-
   </main>
 </body>
+  <script>
+    function fetchText(modelName) {
+        fetch('/static/'+modelName+'/model_summary.txt')
+        .then(response => response.text())
+        .then(data => {
+            document.getElementById('fileContent').textContent = data;
+        })
+        .catch(error => {
+            console.error('Error fetching the file:', error);
+        });
+    }
+    function checkForGraphs(modelStatus) {
+        if (modelStatus == 'Trained') {
+            document.getElementById('divGraphs').style.visibility = 'visible'
+        }
+    }
+    checkForGraphs("{{binary_model.status}}")
+    fetchText("{{binary_model.name}}")
+  </script>
 {% endblock content %}
 </html>
