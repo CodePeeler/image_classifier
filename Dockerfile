@@ -21,8 +21,9 @@ COPY manage.py .
 # Install Python dependencies
 RUN pip install --no-cache-dir \
     Django \
+    django-bootstrap4 \
     h5py \
-    keras \
+    keras==2.15.0 \
     matplotlib \
     numpy \
     pillow \
