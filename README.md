@@ -13,13 +13,13 @@
       cats_or_dogs
         |
         +- cats
-           |
-           +- cat.0.jpg
-              .
-              .
-              .
-             cat.999.jpg
-             
+        .  |
+        .  +- cat.0.jpg
+        .     .
+        .     .
+        .     .
+        .    cat.999.jpg
+        .    
         +- dogs
            |
            +- dog.0.jpg
