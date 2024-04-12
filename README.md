@@ -5,9 +5,9 @@
 * Automatic label generation for training and validation datasets.
   
 
-__NB__ _When uploading your data (for training/validation) for binary classification. Please structure your zip file as follows._
-
-Example cats-v-dogs.zip
+  __NB__ _When uploading your data (training/validation) for binary classification. Please structure your zip file as follows._
+  
+  Example cats-v-dogs.zip
 
     
       cats_or_dogs
