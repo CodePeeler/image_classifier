@@ -15,3 +15,17 @@
 
 
 * User management
+
+___
+
+## Docker
+
+### Build and tag a Docker image
+```bash
+docker build -t <your_tag_name>/image_classifier .
+```
+
+### Start Docker container
+```bash
+docker run -p 8000:8000 --name <your_container_name> <your_tag_name>/image_classifier
+```
