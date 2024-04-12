@@ -3,18 +3,55 @@
 ### Key Features
 
 * Automatic label generation for training and validation datasets.
+  
 
+__NB__ _When uploading your data (for training/validation). Please structure your zip file as follows._
+
+Example cats-v-dogs.zip
+
+    
+      cats_or_dogs
+        |
+        +- cats
+           |
+           +- cat.0.jpg
+              .
+              .
+              .
+             cat.999.jpg
+             
+        +- dogs
+           |
+           +- dog.0.jpg
+              .
+              .
+              .
+            dog.999.jpg
 
 * Model Management features to manage lifecycle.
 
-
-* Training parameters for tweaking learning algorithm.
-
-
-* Visualization of Neural Network.
+      * Quickly create ML model using template
+      * Save and retrain models              
 
 
+* Training parameters for tweaking learning algorithm. 
+
+      * Learning rate
+      * Minimum accuracy
+      * Number of epochs
+
+
+* Performance Metrics:
+
+      * Training v Validation accuracy/loss grpahs
+      * Key Performace Indicators
+          Precision
+          Recall
+          F1 Score
+  
 * User management
+
+  _TODO_
 
 ___
 
