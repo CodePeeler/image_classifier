@@ -3,7 +3,7 @@
 # Check if db.sqlite3 exists
 if [ ! -f ./db.sqlite3 ]; then
     # If database file does not exist, perform initial setup
-    python manage.py makemigrations
+    python manage.py makemigrations binary_cnn
     python manage.py migrate
 fi
 
