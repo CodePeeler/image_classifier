@@ -36,5 +36,9 @@ RUN pip install --no-cache-dir \
 # Expose the port for the development server
 EXPOSE 8000
 
-# Run the Django development server
-CMD ["python", "manage.py", "runserver", "0.0.0.0:8000"]
+# Copy script
+COPY ./setup.sh ./setup.sh
+RUN chmod +x ./setup.sh
+
+# Set entrypoint
+ENTRYPOINT ["./setup.sh"]
