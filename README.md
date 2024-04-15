@@ -2,12 +2,34 @@
 
 ### Key Features
 
-* Automatic label generation for training and validation datasets.
+* Lifecycle management:
+
+      * Quickly create machine learning models with the use of templates
+      * Save/delete and retrain models              
+
+
+* Adjustable training parameters:
+
+      * Learning rate
+      * Minimum accuracy
+      * Number of epochs
+
+
+* Performance Metrics:
+
+      * Training v Validation accuracy/loss grpahs
+      * Key Performace Indicators
+          Precision
+          Recall
+          F1 Score
+          Training time
+
+* Automatic label generation:
   
 
-  __NB__ _When uploading your data (training/validation) for binary classification. Please structure your zip file as follows._
+  __NB__ _When uploading training/validation dataset for binary classification. Please structure your zip file as follows._
   
-  Example cats-v-dogs.zip
+  Example:   _cats-v-dogs.zip_
 
     
       cats_or_dogs
@@ -27,36 +49,17 @@
               .
               .
               dog.999.jpg
-
-* Model Management features to manage lifecycle.
-
-      * Quickly create ML model using template
-      * Save/delete and retrain models              
-
-
-* Training parameters for tweaking learning algorithm. 
-
-      * Learning rate
-      * Minimum accuracy
-      * Number of epochs
-
-
-* Performance Metrics:
-
-      * Training v Validation accuracy/loss grpahs
-      * Key Performace Indicators
-          Precision
-          Recall
-          F1 Score
-          Training time
   
 * User management
 
   _TODO_
 
+
 ___
 
+
 ## Docker
+
 
 ### Build and tag a Docker image
 ```bash
